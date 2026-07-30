@@ -235,6 +235,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (Object.keys(firestoreUpdates).length > 0) {
       try {
         await setDoc(doc(db, 'users', uid), firestoreUpdates, { merge: true });
+        const activeName = data.displayName?.trim() || currentName;
+        if (activeName) {
+          const cleanName = activeName.toLowerCase();
+          await setDoc(doc(db, 'usernames', cleanName), firestoreUpdates, { merge: true });
+        }
       } catch (err) {
         console.warn('Gagal menyimpan profil ke Firestore:', err);
       }

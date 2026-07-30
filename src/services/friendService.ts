@@ -371,8 +371,24 @@ export const searchUsernames = async (
         uid: `uid_${clean}`,
         displayName: candidateName,
         photoURL: null,
-        isSelf: false,
+        isSelf: candidateName.toLowerCase() === (auth.currentUser?.displayName || '').trim().toLowerCase(),
       });
+    }
+
+    // 5. Hard Fix: Resolve missing photoURL for all results from users collection & auth
+    for (const item of resultsMap.values()) {
+      if (!item.photoURL) {
+        if (item.isSelf && auth.currentUser?.photoURL) {
+          item.photoURL = auth.currentUser.photoURL;
+        } else if (item.uid && !item.uid.startsWith('uid_')) {
+          try {
+            const uSnap = await getDoc(doc(db, 'users', item.uid));
+            if (uSnap.exists() && uSnap.data().photoURL) {
+              item.photoURL = uSnap.data().photoURL;
+            }
+          } catch (e) {}
+        }
+      }
     }
 
     return Array.from(resultsMap.values()).slice(0, 8);

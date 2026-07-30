@@ -439,7 +439,7 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({
                     ) : (
                       searchResults.map((res) => {
                         const isMe = res.isSelf || (!!user?.displayName && res.displayName.trim().toLowerCase() === user.displayName.trim().toLowerCase());
-                        const itemPhoto = res.photoURL || localStorage.getItem(`user_photo_${res.uid}`);
+                        const itemPhoto = res.photoURL || (isMe ? user?.photoURL : null) || localStorage.getItem(`user_photo_${res.uid}`);
 
                         return (
                           <div
