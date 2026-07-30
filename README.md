@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🎬 WAST — Anime & Manga WatchList Tracker
 
 <p align="center">
@@ -96,3 +97,6 @@ A state-of-the-art, premium anime and manga tracking application featuring glass
 ## 📝 License
 
 Distributed under the MIT License. See `LICENSE` for more information.
+=======
+# wast
+>>>>>>> 567865a142f8713f612b38c4c07d069411631a46
