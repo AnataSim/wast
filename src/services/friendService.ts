@@ -241,3 +241,50 @@ export const fetchFriendWatchlist = async (friendUid: string): Promise<Watchlist
 
   return items;
 };
+
+export interface UserSearchResult {
+  uid: string;
+  displayName: string;
+  photoURL?: string | null;
+}
+
+/**
+ * Searches for users by username prefix or substring in Firestore.
+ */
+export const searchUsernames = async (
+  searchQuery: string,
+  currentUid?: string
+): Promise<UserSearchResult[]> => {
+  const clean = searchQuery.trim().toLowerCase();
+  if (!clean) return [];
+
+  try {
+    const usernamesCol = collection(db, 'usernames');
+    const snap = await getDocs(usernamesCol);
+    const matches: UserSearchResult[] = [];
+
+    snap.forEach((d) => {
+      const data = d.data();
+      const displayName = data.displayName || d.id;
+      const uid = data.uid;
+
+      if (uid && uid !== currentUid) {
+        if (
+          d.id.toLowerCase().includes(clean) ||
+          displayName.toLowerCase().includes(clean)
+        ) {
+          matches.push({
+            uid,
+            displayName,
+            photoURL: data.photoURL || null,
+          });
+        }
+      }
+    });
+
+    return matches.slice(0, 5);
+  } catch (err) {
+    console.warn('Gagal mencari username:', err);
+    return [];
+  }
+};

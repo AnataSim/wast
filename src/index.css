@@ -655,4 +655,8 @@ body {
   transform: translateX(-2px);
 }
 
+.search-user-item:hover {
+  background: rgba(59, 130, 246, 0.25) !important;
+}
+
 

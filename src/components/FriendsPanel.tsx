@@ -18,8 +18,10 @@ import {
   subscribeToFriendsList, 
   acceptFriendInvitation, 
   rejectFriendInvitation, 
+  searchUsernames,
   type FriendRequest, 
-  type FriendUser 
+  type FriendUser,
+  type UserSearchResult
 } from '../services/friendService';
 
 interface FriendsPanelProps {
@@ -42,10 +44,30 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isInvitationsOpen, setIsInvitationsOpen] = useState(false);
   
-  // Form states
+  // Form states & Live search autocomplete
   const [targetUsername, setTargetUsername] = useState('');
+  const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [sendLoading, setSendLoading] = useState(false);
   const [sendFeedback, setSendFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+
+  // Live search effect as user types targetUsername
+  useEffect(() => {
+    if (!targetUsername.trim()) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const timer = setTimeout(async () => {
+      const results = await searchUsernames(targetUsername, user?.uid);
+      setSearchResults(results);
+      setIsSearching(false);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [targetUsername, user?.uid]);
 
   // Subscribe to real-time friends and invitations if user logged in
   useEffect(() => {
@@ -373,15 +395,98 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({
               <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                 Masukkan Username Teman:
               </label>
-              <input
-                type="text"
-                required
-                placeholder="Contoh: OtakuPro"
-                className="input-clean"
-                value={targetUsername}
-                onChange={(e) => setTargetUsername(e.target.value)}
-                style={{ width: '100%' }}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ketik username teman (cth: S)..."
+                  className="input-clean"
+                  value={targetUsername}
+                  onChange={(e) => setTargetUsername(e.target.value)}
+                  style={{ width: '100%' }}
+                />
+
+                {/* ── Real-time Search Suggestions Dropdown ── */}
+                {targetUsername.trim().length > 0 && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      marginTop: '6px',
+                      background: '#121929',
+                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      borderRadius: '12px',
+                      padding: '6px',
+                      maxHeight: '180px',
+                      overflowY: 'auto',
+                      zIndex: 10,
+                      boxShadow: '0 12px 30px rgba(0, 0, 0, 0.7)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px',
+                    }}
+                  >
+                    {isSearching ? (
+                      <div style={{ padding: '10px', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                        Mencari username &quot;{targetUsername}&quot;...
+                      </div>
+                    ) : searchResults.length === 0 ? (
+                      <div style={{ padding: '10px', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                        User &quot;{targetUsername}&quot; tidak ditemukan
+                      </div>
+                    ) : (
+                      searchResults.map((res) => (
+                        <div
+                          key={res.uid}
+                          onClick={() => {
+                            setTargetUsername(res.displayName);
+                            setSearchResults([]);
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            background: 'rgba(255, 255, 255, 0.04)',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                          }}
+                          className="search-user-item"
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {res.photoURL ? (
+                              <img src={res.photoURL} alt={res.displayName} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
+                            ) : (
+                              <div
+                                style={{
+                                  width: '28px',
+                                  height: '28px',
+                                  borderRadius: '50%',
+                                  background: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  color: '#fff',
+                                  fontWeight: 700,
+                                  fontSize: '0.75rem',
+                                }}
+                              >
+                                {res.displayName.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>{res.displayName}</span>
+                          </div>
+
+                          <span style={{ fontSize: '0.72rem', color: '#60a5fa', fontWeight: 600 }}>Pilih ✓</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
 
               {sendFeedback && (
                 <div
