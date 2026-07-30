@@ -441,6 +441,10 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({
                         <div
                           key={res.uid}
                           onClick={() => {
+                            if (res.isSelf) {
+                              setSendFeedback({ type: 'error', msg: 'Kamu tidak dapat mengirim undangan ke akun sendiri.' });
+                              return;
+                            }
                             setTargetUsername(res.displayName);
                             setSearchResults([]);
                           }}
@@ -450,11 +454,12 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({
                             justifyContent: 'space-between',
                             padding: '8px 12px',
                             borderRadius: '8px',
-                            background: 'rgba(255, 255, 255, 0.04)',
-                            cursor: 'pointer',
+                            background: res.isSelf ? 'rgba(255, 255, 255, 0.02)' : 'rgba(255, 255, 255, 0.04)',
+                            opacity: res.isSelf ? 0.7 : 1,
+                            cursor: res.isSelf ? 'not-allowed' : 'pointer',
                             transition: 'all 0.15s ease',
                           }}
-                          className="search-user-item"
+                          className={res.isSelf ? '' : 'search-user-item'}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             {res.photoURL ? (
@@ -477,10 +482,19 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({
                                 {res.displayName.charAt(0).toUpperCase()}
                               </div>
                             )}
-                            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>{res.displayName}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>{res.displayName}</span>
+                              {res.isSelf && (
+                                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.08)', padding: '2px 6px', borderRadius: '4px' }}>
+                                  Kamu
+                                </span>
+                              )}
+                            </div>
                           </div>
 
-                          <span style={{ fontSize: '0.72rem', color: '#60a5fa', fontWeight: 600 }}>Pilih ✓</span>
+                          <span style={{ fontSize: '0.72rem', color: res.isSelf ? 'var(--text-muted)' : '#60a5fa', fontWeight: 600 }}>
+                            {res.isSelf ? 'Akun Kamu' : 'Pilih ✓'}
+                          </span>
                         </div>
                       ))
                     )}

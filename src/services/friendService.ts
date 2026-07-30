@@ -246,10 +246,11 @@ export interface UserSearchResult {
   uid: string;
   displayName: string;
   photoURL?: string | null;
+  isSelf?: boolean;
 }
 
 /**
- * Searches for users by username prefix or substring in Firestore.
+ * Searches for users by username prefix or substring in Firestore across both usernames and users collections.
  */
 export const searchUsernames = async (
   searchQuery: string,
@@ -259,30 +260,59 @@ export const searchUsernames = async (
   if (!clean) return [];
 
   try {
-    const usernamesCol = collection(db, 'usernames');
-    const snap = await getDocs(usernamesCol);
-    const matches: UserSearchResult[] = [];
+    const resultsMap = new Map<string, UserSearchResult>();
 
-    snap.forEach((d) => {
-      const data = d.data();
-      const displayName = data.displayName || d.id;
-      const uid = data.uid;
+    // 1. Search 'usernames' collection
+    try {
+      const usernamesSnap = await getDocs(collection(db, 'usernames'));
+      usernamesSnap.forEach((d) => {
+        const data = d.data();
+        const displayName = data.displayName || d.id;
+        const uid = data.uid || d.id;
 
-      if (uid && uid !== currentUid) {
         if (
           d.id.toLowerCase().includes(clean) ||
           displayName.toLowerCase().includes(clean)
         ) {
-          matches.push({
+          resultsMap.set(uid, {
             uid,
             displayName,
-            photoURL: data.photoURL || null,
+            photoURL: data.photoURL || localStorage.getItem(`user_photo_${uid}`) || null,
+            isSelf: uid === currentUid,
           });
         }
-      }
-    });
+      });
+    } catch (e) {
+      console.warn('Gagal membaca collection usernames:', e);
+    }
 
-    return matches.slice(0, 5);
+    // 2. Search 'users' collection (covers all accounts registered in database)
+    try {
+      const usersSnap = await getDocs(collection(db, 'users'));
+      usersSnap.forEach((d) => {
+        const uid = d.id;
+        const data = d.data();
+        const displayName = data.displayName || data.email?.split('@')[0] || 'User';
+
+        if (
+          displayName.toLowerCase().includes(clean) ||
+          (data.email && data.email.toLowerCase().includes(clean))
+        ) {
+          if (!resultsMap.has(uid)) {
+            resultsMap.set(uid, {
+              uid,
+              displayName,
+              photoURL: data.photoURL || localStorage.getItem(`user_photo_${uid}`) || null,
+              isSelf: uid === currentUid,
+            });
+          }
+        }
+      });
+    } catch (e) {
+      console.warn('Gagal membaca collection users:', e);
+    }
+
+    return Array.from(resultsMap.values()).slice(0, 8);
   } catch (err) {
     console.warn('Gagal mencari username:', err);
     return [];
