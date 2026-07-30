@@ -461,36 +461,41 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({
                           }}
                           className={res.isSelf ? '' : 'search-user-item'}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            {res.photoURL ? (
-                              <img src={res.photoURL} alt={res.displayName} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
-                            ) : (
-                              <div
-                                style={{
-                                  width: '28px',
-                                  height: '28px',
-                                  borderRadius: '50%',
-                                  background: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  color: '#fff',
-                                  fontWeight: 700,
-                                  fontSize: '0.75rem',
-                                }}
-                              >
-                                {res.displayName.charAt(0).toUpperCase()}
-                              </div>
-                            )}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>{res.displayName}</span>
-                              {res.isSelf && (
-                                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.08)', padding: '2px 6px', borderRadius: '4px' }}>
-                                  Kamu
-                                </span>
+                        {(() => {
+                          const itemPhoto = res.photoURL || (res.isSelf ? user?.photoURL : null) || localStorage.getItem(`user_photo_${res.uid}`);
+                          return (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              {itemPhoto ? (
+                                <img src={itemPhoto} alt={res.displayName} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
+                              ) : (
+                                <div
+                                  style={{
+                                    width: '28px',
+                                    height: '28px',
+                                    borderRadius: '50%',
+                                    background: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: '#fff',
+                                    fontWeight: 700,
+                                    fontSize: '0.75rem',
+                                  }}
+                                >
+                                  {res.displayName.charAt(0).toUpperCase()}
+                                </div>
                               )}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>{res.displayName}</span>
+                                {res.isSelf && (
+                                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.08)', padding: '2px 6px', borderRadius: '4px' }}>
+                                    Kamu
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                          </div>
+                          );
+                        })()}
 
                           <span style={{ fontSize: '0.72rem', color: res.isSelf ? 'var(--text-muted)' : '#60a5fa', fontWeight: 600 }}>
                             {res.isSelf ? 'Akun Kamu' : 'Pilih ✓'}
