@@ -77,7 +77,7 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({
       return;
     }
 
-    const unsubRequests = subscribeToIncomingRequests(user.uid, (reqs) => {
+    const unsubRequests = subscribeToIncomingRequests(user, (reqs) => {
       setIncomingRequests(reqs);
     });
 

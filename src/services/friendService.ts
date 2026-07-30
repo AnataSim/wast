@@ -145,16 +145,26 @@ export const sendFriendInvitation = async (
  * Real-time subscription to incoming pending friend invitations.
  */
 export const subscribeToIncomingRequests = (
-  uid: string, 
+  userOrUid: User | string, 
   onData: (requests: FriendRequest[]) => void
 ) => {
+  const uid = typeof userOrUid === 'string' ? userOrUid : userOrUid.uid;
+  const usernameClean = (typeof userOrUid === 'string' ? '' : userOrUid.displayName || '').trim().toLowerCase();
   const requestsCol = collection(db, 'friend_requests');
-  const q = query(requestsCol, where('toUid', '==', uid), where('status', '==', 'pending'));
 
-  return onSnapshot(q, (snapshot) => {
+  return onSnapshot(requestsCol, (snapshot) => {
     const list: FriendRequest[] = [];
     snapshot.forEach((d) => {
-      list.push({ id: d.id, ...d.data() } as FriendRequest);
+      const data = d.data();
+      if (data.status === 'pending') {
+        const toUidMatch = data.toUid === uid;
+        const toNameMatch = usernameClean && data.toUsername && data.toUsername.trim().toLowerCase() === usernameClean;
+        const toUidCleanMatch = usernameClean && (data.toUid === `uid_${usernameClean}` || data.toUid === usernameClean);
+
+        if (toUidMatch || toNameMatch || toUidCleanMatch) {
+          list.push({ id: d.id, ...data } as FriendRequest);
+        }
+      }
     });
     onData(list);
   }, (err) => console.warn('Gagal memuat undangan pertemanan:', err));
