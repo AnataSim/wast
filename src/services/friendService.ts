@@ -9,7 +9,7 @@ import {
   query, 
   where 
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db, auth } from '../config/firebase';
 import type { User } from 'firebase/auth';
 import type { WatchlistItem } from '../types/watchlist';
 
