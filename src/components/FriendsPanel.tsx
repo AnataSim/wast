@@ -95,21 +95,28 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({
 
   const hasPendingInvitations = incomingRequests.length > 0;
 
-  const handleSendRequest = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const sendInvitationToName = async (usernameToInvite: string) => {
     setSendFeedback(null);
-    if (!targetUsername.trim()) return;
+    const clean = usernameToInvite.trim();
+    if (!clean) return;
 
     setSendLoading(true);
+    setSearchResults([]);
+
     try {
-      await sendFriendInvitation(user, targetUsername);
-      setSendFeedback({ type: 'success', msg: `✅ Undangan berhasil dikirim ke "${targetUsername.trim()}"!` });
+      await sendFriendInvitation(user, clean);
+      setSendFeedback({ type: 'success', msg: `✅ Undangan pertemanan berhasil dikirim ke "${clean}"!` });
       setTargetUsername('');
     } catch (err: any) {
       setSendFeedback({ type: 'error', msg: err.message || 'Gagal mengirim undangan.' });
     } finally {
       setSendLoading(false);
     }
+  };
+
+  const handleSendRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await sendInvitationToName(targetUsername);
   };
 
   const handleAccept = async (req: FriendRequest) => {
@@ -449,8 +456,7 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({
                                 setSendFeedback({ type: 'error', msg: 'Kamu tidak dapat mengirim undangan ke akun sendiri.' });
                                 return;
                               }
-                              setTargetUsername(res.displayName);
-                              setSearchResults([]);
+                              sendInvitationToName(res.displayName);
                             }}
                             style={{
                               display: 'flex',
