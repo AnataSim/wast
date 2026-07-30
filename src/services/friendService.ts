@@ -300,12 +300,11 @@ export const searchUsernames = async (
         const data = directDocSnap.data();
         const uid = data.uid || directDocSnap.id;
         const displayName = data.displayName || directDocSnap.id;
-        const isSelf = uid === currentUid;
-        const myPhoto = isSelf ? auth.currentUser?.photoURL : null;
+        const isSelf = uid === currentUid || displayName.trim().toLowerCase() === (auth.currentUser?.displayName || '').trim().toLowerCase();
         resultsMap.set(uid, {
           uid,
           displayName,
-          photoURL: data.photoURL || myPhoto || localStorage.getItem(`user_photo_${uid}`) || null,
+          photoURL: data.photoURL || localStorage.getItem(`user_photo_${uid}`) || null,
           isSelf,
         });
       }
@@ -325,12 +324,11 @@ export const searchUsernames = async (
           d.id.toLowerCase().includes(clean) ||
           displayName.toLowerCase().includes(clean)
         ) {
-          const isSelf = uid === currentUid;
-          const myPhoto = isSelf ? auth.currentUser?.photoURL : null;
+          const isSelf = uid === currentUid || displayName.trim().toLowerCase() === (auth.currentUser?.displayName || '').trim().toLowerCase();
           resultsMap.set(uid, {
             uid,
             displayName,
-            photoURL: data.photoURL || myPhoto || localStorage.getItem(`user_photo_${uid}`) || null,
+            photoURL: data.photoURL || localStorage.getItem(`user_photo_${uid}`) || null,
             isSelf,
           });
         }
@@ -352,12 +350,11 @@ export const searchUsernames = async (
           (data.email && data.email.toLowerCase().includes(clean))
         ) {
           if (!resultsMap.has(uid)) {
-            const isSelf = uid === currentUid;
-            const myPhoto = isSelf ? auth.currentUser?.photoURL : null;
+            const isSelf = uid === currentUid || displayName.trim().toLowerCase() === (auth.currentUser?.displayName || '').trim().toLowerCase();
             resultsMap.set(uid, {
               uid,
               displayName,
-              photoURL: data.photoURL || myPhoto || localStorage.getItem(`user_photo_${uid}`) || null,
+              photoURL: data.photoURL || localStorage.getItem(`user_photo_${uid}`) || null,
               isSelf,
             });
           }
