@@ -437,33 +437,34 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({
                         User &quot;{targetUsername}&quot; tidak ditemukan
                       </div>
                     ) : (
-                      searchResults.map((res) => (
-                        <div
-                          key={res.uid}
-                          onClick={() => {
-                            if (res.isSelf) {
-                              setSendFeedback({ type: 'error', msg: 'Kamu tidak dapat mengirim undangan ke akun sendiri.' });
-                              return;
-                            }
-                            setTargetUsername(res.displayName);
-                            setSearchResults([]);
-                          }}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: '8px 12px',
-                            borderRadius: '8px',
-                            background: res.isSelf ? 'rgba(255, 255, 255, 0.02)' : 'rgba(255, 255, 255, 0.04)',
-                            opacity: res.isSelf ? 0.7 : 1,
-                            cursor: res.isSelf ? 'not-allowed' : 'pointer',
-                            transition: 'all 0.15s ease',
-                          }}
-                          className={res.isSelf ? '' : 'search-user-item'}
-                        >
-                        {(() => {
-                          const itemPhoto = res.photoURL || (res.isSelf ? user?.photoURL : null) || localStorage.getItem(`user_photo_${res.uid}`);
-                          return (
+                      searchResults.map((res) => {
+                        const isMe = res.isSelf || (!!user?.displayName && res.displayName.trim().toLowerCase() === user.displayName.trim().toLowerCase());
+                        const itemPhoto = (isMe ? user?.photoURL : null) || res.photoURL || (user?.uid ? localStorage.getItem(`user_photo_${user.uid}`) : null) || localStorage.getItem(`user_photo_${res.uid}`);
+
+                        return (
+                          <div
+                            key={res.uid}
+                            onClick={() => {
+                              if (isMe) {
+                                setSendFeedback({ type: 'error', msg: 'Kamu tidak dapat mengirim undangan ke akun sendiri.' });
+                                return;
+                              }
+                              setTargetUsername(res.displayName);
+                              setSearchResults([]);
+                            }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              background: isMe ? 'rgba(255, 255, 255, 0.02)' : 'rgba(255, 255, 255, 0.04)',
+                              opacity: isMe ? 0.7 : 1,
+                              cursor: isMe ? 'not-allowed' : 'pointer',
+                              transition: 'all 0.15s ease',
+                            }}
+                            className={isMe ? '' : 'search-user-item'}
+                          >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                               {itemPhoto ? (
                                 <img src={itemPhoto} alt={res.displayName} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
@@ -487,21 +488,20 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({
                               )}
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>{res.displayName}</span>
-                                {res.isSelf && (
+                                {isMe && (
                                   <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.08)', padding: '2px 6px', borderRadius: '4px' }}>
                                     Kamu
                                   </span>
                                 )}
                               </div>
                             </div>
-                          );
-                        })()}
 
-                          <span style={{ fontSize: '0.72rem', color: res.isSelf ? 'var(--text-muted)' : '#60a5fa', fontWeight: 600 }}>
-                            {res.isSelf ? 'Akun Kamu' : 'Pilih ✓'}
-                          </span>
-                        </div>
-                      ))
+                            <span style={{ fontSize: '0.72rem', color: isMe ? 'var(--text-muted)' : '#60a5fa', fontWeight: 600 }}>
+                              {isMe ? 'Akun Kamu' : 'Pilih ✓'}
+                            </span>
+                          </div>
+                        );
+                      })
                     )}
                   </div>
                 )}
