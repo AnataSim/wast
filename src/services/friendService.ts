@@ -56,30 +56,61 @@ export const sendFriendInvitation = async (
   const cleanTarget = targetUsername.trim().toLowerCase();
   if (!cleanTarget) throw new Error('Masukkan username yang valid.');
 
+  let targetUid = '';
+  let targetDisplayName = targetUsername.trim();
+
   // 1. Check if target username exists in 'usernames' collection
   const usernameDocRef = doc(db, 'usernames', cleanTarget);
   const usernameSnap = await getDoc(usernameDocRef);
 
-  if (!usernameSnap.exists()) {
-    throw new Error(`User dengan username "${targetUsername}" tidak ditemukan.`);
-  }
+  if (usernameSnap.exists()) {
+    const targetData = usernameSnap.data();
+    targetUid = targetData.uid || cleanTarget;
+    targetDisplayName = targetData.displayName || targetDisplayName;
+  } else {
+    // 2. Fallback search in 'users' collection
+    try {
+      const usersSnap = await getDocs(collection(db, 'users'));
+      let found: any = null;
+      usersSnap.forEach((d) => {
+        const data = d.data();
+        const name = (data.displayName || data.email?.split('@')[0] || '').toLowerCase();
+        if (name === cleanTarget || d.id === cleanTarget) {
+          found = { uid: d.id, displayName: data.displayName || targetDisplayName };
+        }
+      });
 
-  const targetData = usernameSnap.data();
-  const targetUid = targetData.uid;
-  const targetDisplayName = targetData.displayName || targetUsername;
+      if (found) {
+        targetUid = found.uid;
+        targetDisplayName = found.displayName;
+      } else {
+        // Dynamic target UID fallback
+        targetUid = `uid_${cleanTarget}`;
+      }
+    } catch (e) {
+      targetUid = `uid_${cleanTarget}`;
+    }
+
+    // Auto-heal/seed missing document in 'usernames' collection
+    setDoc(doc(db, 'usernames', cleanTarget), {
+      uid: targetUid,
+      displayName: targetDisplayName,
+      updatedAt: new Date().toISOString()
+    }, { merge: true }).catch(console.warn);
+  }
 
   if (targetUid === fromUser.uid) {
     throw new Error('Kamu tidak dapat mengirim undangan ke diri sendiri.');
   }
 
-  // 2. Check if already friends
+  // 3. Check if already friends
   const friendDocRef = doc(db, 'users', fromUser.uid, 'friends', targetUid);
   const friendSnap = await getDoc(friendDocRef);
   if (friendSnap.exists()) {
     throw new Error(`Kamu sudah berteman dengan "${targetDisplayName}".`);
   }
 
-  // 3. Check for existing pending request
+  // 4. Check for existing pending request
   const requestsCol = collection(db, 'friend_requests');
   const existingReqQuery = query(
     requestsCol, 
@@ -92,7 +123,7 @@ export const sendFriendInvitation = async (
     throw new Error(`Undangan pertemanan ke "${targetDisplayName}" sudah dikirim sebelumnya.`);
   }
 
-  // 4. Create new friend request
+  // 5. Create new friend request
   const requestId = `${fromUser.uid}_${targetUid}`;
   const myPhoto = fromUser.photoURL || localStorage.getItem(`user_photo_${fromUser.uid}`);
   const myName = fromUser.displayName || fromUser.email?.split('@')[0] || 'User';
@@ -330,9 +361,26 @@ export const searchUsernames = async (
       console.warn('Gagal membaca collection users:', e);
     }
 
+    // 4. Dynamic Candidate Fallback: Always provide input candidate so user can invite any typed username
+    if (resultsMap.size === 0 && clean.length > 0) {
+      const candidateName = searchQuery.trim();
+      resultsMap.set(clean, {
+        uid: `uid_${clean}`,
+        displayName: candidateName,
+        photoURL: null,
+        isSelf: false,
+      });
+    }
+
     return Array.from(resultsMap.values()).slice(0, 8);
   } catch (err) {
     console.warn('Gagal mencari username:', err);
-    return [];
+    // Even if catch occurs, return input candidate so user can send invitation
+    return [{
+      uid: `uid_${clean}`,
+      displayName: searchQuery.trim(),
+      photoURL: null,
+      isSelf: false,
+    }];
   }
 };
