@@ -21,7 +21,6 @@ import { FriendProfileModal } from './components/FriendProfileModal';
 import { InspectWatchlistModal } from './components/InspectWatchlistModal';
 import { subscribeToIncomingRequests, type FriendRequest, type FriendUser } from './services/friendService';
 
-const STORAGE_KEY = 'watchlist_anime_manga_tracker_empty_v3';
 
 export class ErrorBoundary extends React.Component<
   { children: React.ReactNode },

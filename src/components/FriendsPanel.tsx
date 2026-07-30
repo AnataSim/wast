@@ -5,11 +5,8 @@ import {
   Mail, 
   Check, 
   X, 
-  Search, 
   AlertCircle, 
-  ChevronRight, 
-  Sparkles,
-  ShieldCheck
+  ChevronRight
 } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import { 

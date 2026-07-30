@@ -160,7 +160,9 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
           >
             {nickname}
           </h3>
-
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+            {email}
+          </p>
         </div>
 
         {/* Total List Stats Box */}
