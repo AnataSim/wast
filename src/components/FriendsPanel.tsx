@@ -24,15 +24,15 @@ import {
 
 interface FriendsPanelProps {
   user: User | null;
-  isOpenMobile: boolean;
-  onToggleMobile: () => void;
+  isOpen: boolean;
+  onClose: () => void;
   onSelectFriend: (friend: FriendUser) => void;
 }
 
 export const FriendsPanel: React.FC<FriendsPanelProps> = ({
   user,
-  isOpenMobile,
-  onToggleMobile,
+  isOpen,
+  onClose,
   onSelectFriend,
 }) => {
   const [friends, setFriends] = useState<FriendUser[]>([]);
@@ -108,16 +108,16 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({
 
   return (
     <>
-      {/* ── Outer Overlay Backdrop for Mobile ────────────────────────────────── */}
-      {isOpenMobile && (
+      {/* ── Outer Overlay Backdrop for Mobile / Tablet ──────────────────────── */}
+      {isOpen && (
         <div
-          onClick={onToggleMobile}
+          onClick={onClose}
           style={{
             position: 'fixed',
             inset: 0,
             zIndex: 3900,
-            background: 'rgba(0,0,0,0.6)',
-            backdropFilter: 'blur(4px)',
+            background: 'rgba(0,0,0,0.5)',
+            backdropFilter: 'blur(3px)',
           }}
           className="mobile-friends-overlay"
         />
@@ -126,21 +126,22 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({
       {/* ── Right Panel Container ───────────────────────────────────────────── */}
       <aside
         style={{
-          width: '280px',
+          width: '300px',
           background: '#0d1322',
-          borderLeft: '1px solid rgba(255, 255, 255, 0.08)',
+          borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
           display: 'flex',
           flexDirection: 'column',
-          height: '100vh',
-          position: 'sticky',
-          top: 0,
+          position: 'fixed',
+          top: '60px',
           right: 0,
+          bottom: 0,
+          height: 'calc(100vh - 60px)',
           zIndex: 4000,
-          boxShadow: '-8px 0 30px rgba(0, 0, 0, 0.5)',
-          flexShrink: 0,
+          boxShadow: '-10px 0 40px rgba(0, 0, 0, 0.6)',
+          transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
           transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
-        className={`friends-panel ${isOpenMobile ? 'open-mobile' : ''}`}
+        className="friends-panel"
       >
         {/* Panel Header */}
         <div
@@ -170,18 +171,21 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({
           </div>
 
           <button
-            onClick={onToggleMobile}
+            onClick={onClose}
+            title="Tutup Panel Teman"
             style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-muted)',
+              background: 'rgba(255, 255, 255, 0.08)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '6px',
+              padding: '4px',
+              color: '#fff',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'center',
             }}
-            className="mobile-friends-close"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 

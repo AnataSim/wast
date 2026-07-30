@@ -644,30 +644,9 @@ body {
   }
 }
 
-/* Friends Panel Responsive Styles */
-.mobile-friends-close {
-  display: none;
-}
+/* Friends Panel Fixed Sidebar Styles */
 .friends-toggle-btn {
   display: flex;
-}
-
-@media (max-width: 1024px) {
-  .friends-panel {
-    position: fixed !important;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    height: 100vh !important;
-    transform: translateX(100%);
-    z-index: 5000 !important;
-  }
-  .friends-panel.open-mobile {
-    transform: translateX(0) !important;
-  }
-  .mobile-friends-close {
-    display: flex !important;
-  }
 }
 
 .friend-row-card:hover {
