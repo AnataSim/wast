@@ -947,105 +947,136 @@ export const AppContent: React.FC = () => {
         <div style={{ display: 'flex', flex: 1, minWidth: 0, position: 'relative' }}>
           {/* Main Content Area */}
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-
-      {/* Centering container - export div shrinks to content during export */}
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-      <div
-        ref={exportRef as React.RefObject<HTMLDivElement>}
-        style={{
-          background: 'transparent',
-          padding: '20px 3px 3px',
-          width: '100%',
-        }}
-      >
-        <StatsDashboard
-          stats={stats}
-          activeStatusFilter={filter.status}
-          onSelectStatus={(status) => handleFilterChange({ status })}
-          onExportPNG={handleExportPNG}
-          isExporting={isExporting}
-        />
-
-        <main 
-          style={{ 
-            maxWidth: '1200px', 
-            width: '100%', 
-            margin: '0 auto',
-            padding: '0 16px 0',
-            background: 'transparent'
-          }}
-        >
-          {filteredItems.length > 0 ? (
-            <>
-              {renderPagination('top')}
-              <div className="cards-list" style={{ background: 'transparent' }}>
-                {paginatedItems.map((item, index) => {
-                  const globalIndex = (itemsPerPage === 'all' || !isPaginationActive)
-                    ? index
-                    : (currentPage - 1) * (itemsPerPage as number) + index;
-                  return (
-                    <WatchCard
-                      key={item.id}
-                      item={item}
-                      index={globalIndex}
-                      activeBgPickerId={activeBgPickerId}
-                      onToggleBgPicker={(id) => setActiveBgPickerId((prev) => (prev === id ? null : id))}
-                      onCloseBgPicker={() => setActiveBgPickerId(null)}
-                      onUpdateStatus={handleUpdateStatus}
-                      onIncrementEpisode={handleIncrementEpisode}
-                      onDecrementEpisode={handleDecrementEpisode}
-                      onToggleFavorite={handleToggleFavorite}
-                      onRateItem={handleRateItem}
-                      onEditItem={(itemToEdit) => {
-                        setEditingItem(itemToEdit);
-                        setIsMediaModalOpen(true);
-                      }}
-                      onDeleteItem={handleDeleteItem}
-                      onUpdateTimestamp={handleUpdateTimestamp}
-                      onUpdateBannerPosition={handleUpdateBannerPosition}
-                      totalItems={filteredItems.length}
-                      onMoveUp={handleMoveUp}
-                      onMoveDown={handleMoveDown}
-                    />
-                  );
-                })}
-              </div>
-              {renderPagination('bottom')}
-            </>
-          ) : (
-            <div style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-md)',
-              padding: '40px 20px',
-              textAlign: 'center',
-              margin: '20px 0'
-            }}>
-              <AlertCircle size={28} color="var(--text-muted)" style={{ marginBottom: '12px' }} />
-              <h3 style={{ fontSize: '1rem', color: '#fff', marginBottom: '4px' }}>Tidak ada judul ditemukan</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginBottom: '16px' }}>
-                Coba sesuaikan kata kunci pencarian atau filter yang digunakan.
-              </p>
-              <button
-                onClick={() => {
-                  setFilter({
-                    searchQuery: '',
-                    category: 'all',
-                    status: 'all',
-                    genre: 'all',
-                    sortBy: 'customOrder',
-                    sortOrder: 'asc',
-                    favoritesOnly: false,
-                  });
+            {/* Centering container - export div shrinks to content during export */}
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <div
+                ref={exportRef as React.RefObject<HTMLDivElement>}
+                style={{
+                  background: 'transparent',
+                  padding: '20px 3px 3px',
+                  width: '100%',
                 }}
-                className="pill-btn"
               >
-                <RefreshCw size={14} /> Reset Filter
-              </button>
+                <StatsDashboard
+                  stats={stats}
+                  activeStatusFilter={filter.status}
+                  onSelectStatus={(status) => handleFilterChange({ status })}
+                  onExportPNG={handleExportPNG}
+                  isExporting={isExporting}
+                />
+
+                <main 
+                  style={{ 
+                    maxWidth: '1200px', 
+                    width: '100%', 
+                    margin: '0 auto',
+                    padding: '0 16px 0',
+                    background: 'transparent'
+                  }}
+                >
+                  {filteredItems.length > 0 ? (
+                    <>
+                      {renderPagination('top')}
+                      <div className="cards-list" style={{ background: 'transparent' }}>
+                        {paginatedItems.map((item, index) => {
+                          const globalIndex = (itemsPerPage === 'all' || !isPaginationActive)
+                            ? index
+                            : (currentPage - 1) * (itemsPerPage as number) + index;
+                          return (
+                            <WatchCard
+                              key={item.id}
+                              item={item}
+                              index={globalIndex}
+                              activeBgPickerId={activeBgPickerId}
+                              onToggleBgPicker={(id) => setActiveBgPickerId((prev) => (prev === id ? null : id))}
+                              onCloseBgPicker={() => setActiveBgPickerId(null)}
+                              onUpdateStatus={handleUpdateStatus}
+                              onIncrementEpisode={handleIncrementEpisode}
+                              onDecrementEpisode={handleDecrementEpisode}
+                              onToggleFavorite={handleToggleFavorite}
+                              onRateItem={handleRateItem}
+                              onEditItem={(itemToEdit) => {
+                                setEditingItem(itemToEdit);
+                                setIsMediaModalOpen(true);
+                              }}
+                              onDeleteItem={handleDeleteItem}
+                              onUpdateTimestamp={handleUpdateTimestamp}
+                              onUpdateBannerPosition={handleUpdateBannerPosition}
+                              totalItems={filteredItems.length}
+                              onMoveUp={handleMoveUp}
+                              onMoveDown={handleMoveDown}
+                            />
+                          );
+                        })}
+                      </div>
+                      {renderPagination('bottom')}
+                    </>
+                  ) : (
+                    <div style={{
+                      background: 'var(--bg-card)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '40px 20px',
+                      textAlign: 'center',
+                      margin: '20px 0'
+                    }}>
+                      <AlertCircle size={28} color="var(--text-muted)" style={{ marginBottom: '12px' }} />
+                      <h3 style={{ fontSize: '1rem', color: '#fff', marginBottom: '4px' }}>Tidak ada judul ditemukan</h3>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginBottom: '16px' }}>
+                        Coba sesuaikan kata kunci pencarian atau filter yang digunakan.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setFilter({
+                            searchQuery: '',
+                            category: 'all',
+                            status: 'all',
+                            genre: 'all',
+                            sortBy: 'customOrder',
+                            sortOrder: 'asc',
+                            favoritesOnly: false,
+                          });
+                        }}
+                        className="pill-btn"
+                      >
+                        <RefreshCw size={14} /> Reset Filter
+                      </button>
+                    </div>
+                  )}
+                </main>
+              </div>
             </div>
-          )}
-        </main>
-      </div>
+
+            <footer style={{
+              margin: '40px auto 0',
+              maxWidth: '1200px',
+              width: '100%',
+              padding: '20px 16px',
+              borderTop: '1px solid var(--border-subtle)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              color: 'var(--text-muted)',
+              fontSize: '0.8rem'
+            }}>
+              <div>Anime &amp; Manga List Tracker &bull; Firebase Auth &amp; Firestore Enabled</div>
+              <button
+                onClick={handleResetData}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.78rem' }}
+              >
+                Reset Sample Data
+              </button>
+            </footer>
+          </div>
+
+          {/* Right Sidebar: Friends Panel */}
+          <FriendsPanel
+            user={user}
+            isOpenMobile={isOpenMobileFriends}
+            onToggleMobile={() => setIsOpenMobileFriends((prev) => !prev)}
+            onSelectFriend={(friend) => setSelectedFriendForProfile(friend)}
+          />
+        </div>
       </div>
 
       <ErrorBoundary>
@@ -1069,37 +1100,6 @@ export const AppContent: React.FC = () => {
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
       />
-
-      <footer style={{
-        margin: '40px auto 0',
-        maxWidth: '1200px',
-        width: '100%',
-        padding: '20px 16px',
-        borderTop: '1px solid var(--border-subtle)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        color: 'var(--text-muted)',
-        fontSize: '0.8rem'
-      }}>
-        <div>Anime &amp; Manga List Tracker &bull; Firebase Auth &amp; Firestore Enabled</div>
-        <button
-          onClick={handleResetData}
-          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.78rem' }}
-        >
-          Reset Sample Data
-        </button>
-      </footer>
-      </div>
-
-      {/* Right Sidebar: Friends Panel */}
-      <FriendsPanel
-        user={user}
-        isOpenMobile={isOpenMobileFriends}
-        onToggleMobile={() => setIsOpenMobileFriends((prev) => !prev)}
-        onSelectFriend={(friend) => setSelectedFriendForProfile(friend)}
-      />
-      </div>
 
       {/* Modals */}
       <FriendProfileModal
