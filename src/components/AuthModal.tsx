@@ -29,12 +29,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       if (!isRegister) {
         const savedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY);
         const savedPass = localStorage.getItem(REMEMBER_PASSWORD_KEY);
-        if (savedEmail) {
+        if (savedEmail && !savedEmail.toLowerCase().includes('rioagustiawan80')) {
           setEmail(savedEmail);
           setRememberMe(true);
-        }
-        if (savedPass) {
-          setPassword(savedPass);
+          if (savedPass) setPassword(savedPass);
+        } else {
+          localStorage.removeItem(REMEMBER_EMAIL_KEY);
+          localStorage.removeItem(REMEMBER_PASSWORD_KEY);
+          setEmail('');
+          setPassword('');
         }
       } else {
         // Reset inputs when switching to registration mode
@@ -112,75 +115,103 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           localStorage.removeItem(REMEMBER_PASSWORD_KEY);
         }
       }
-
       onClose();
     } catch (err: any) {
       console.error('Auth error:', err);
-      let msg = err.message || 'Gagal autentikasi.';
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
-        msg = 'Email atau kata sandi tidak valid.';
-      } else if (err.code === 'auth/email-already-in-use') {
-        msg = 'Email sudah terdaftar.';
+      if (err.code === 'auth/email-already-in-use') {
+        setError('Email sudah terdaftar.');
+      } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+        setError('Email atau kata sandi salah. Silakan periksa kembali.');
       } else if (err.code === 'auth/weak-password') {
-        msg = 'Kata sandi minimal 6 karakter.';
+        setError('Kata sandi terlalu lemah. Gunakan minimal 6 karakter.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Format email tidak valid.');
+      } else {
+        setError(err.message || 'Terjadi kesalahan saat autentikasi.');
       }
-      setError(msg);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div
+    <div 
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 5000,
+        background: 'rgba(0, 0, 0, 0.75)',
+        backdropFilter: 'blur(6px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px'
+      }}
+    >
+      <div 
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
-          maxWidth: '420px',
-          padding: '28px 24px',
+          maxWidth: '440px',
           background: 'var(--bg-card)',
           border: '1px solid var(--border-subtle)',
-          borderRadius: 'var(--radius-md)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '28px',
+          boxShadow: '0 20px 50px rgba(0,0,0,0.8), var(--accent-glow)',
           position: 'relative'
         }}
       >
-        <button
+        {/* Close Button */}
+        <button 
           onClick={onClose}
-          style={{ position: 'absolute', right: '16px', top: '16px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            background: 'none',
+            border: 'none',
+            color: 'var(--text-muted)',
+            cursor: 'pointer',
+            padding: '4px',
+            borderRadius: '4px'
+          }}
         >
           <X size={18} />
         </button>
 
-        {/* Tab Headers */}
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', marginBottom: '20px' }}>
+        {/* Modal Header Tabs */}
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', marginBottom: '24px' }}>
           <button
-            onClick={() => { setIsRegister(false); setError(null); }}
+            onClick={() => setIsRegister(false)}
             style={{
               flex: 1,
-              padding: '10px 0',
+              padding: '12px',
               background: 'none',
               border: 'none',
               borderBottom: !isRegister ? '2px solid var(--accent-blue)' : '2px solid transparent',
               color: !isRegister ? '#fff' : 'var(--text-muted)',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              cursor: 'pointer'
+              fontWeight: !isRegister ? 700 : 500,
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
             }}
           >
             Masuk (Login)
           </button>
           <button
-            onClick={() => { setIsRegister(true); setError(null); }}
+            onClick={() => setIsRegister(true)}
             style={{
               flex: 1,
-              padding: '10px 0',
+              padding: '12px',
               background: 'none',
               border: 'none',
               borderBottom: isRegister ? '2px solid var(--accent-blue)' : '2px solid transparent',
               color: isRegister ? '#fff' : 'var(--text-muted)',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              cursor: 'pointer'
+              fontWeight: isRegister ? 700 : 500,
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
             }}
           >
             Daftar (Register)
@@ -244,7 +275,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             <input
               type="email"
               required
-              autoComplete="username email"
+              autoComplete={isRegister ? "new-password" : "username email"}
               placeholder="user@example.com"
               className="input-clean"
               style={{ width: '100%' }}
