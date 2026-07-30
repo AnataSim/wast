@@ -141,10 +141,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           displayName: trimmedName,
           createdAt: new Date().toISOString()
         });
-        await setDoc(doc(db, 'users', uid), { displayName: trimmedName }, { merge: true });
+        await setDoc(doc(db, 'users', uid), { 
+          displayName: trimmedName,
+          email: email.trim(),
+          createdAt: new Date().toISOString()
+        }, { merge: true });
       } catch (err) {
         console.warn('Gagal menyimpan username ke Firestore:', err);
       }
+
+      // Immediately patch local user state with the newly created displayName
+      const patchedUser = Object.assign(
+        Object.create(Object.getPrototypeOf(userCred.user)),
+        userCred.user,
+        { displayName: trimmedName }
+      );
+      setUser(patchedUser);
     }
   };
 

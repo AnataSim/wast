@@ -22,20 +22,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const [isUsernameTaken, setIsUsernameTaken] = useState(false);
 
-  // Auto-fill email & password if remembered or registered previously
+  // Auto-fill email & password only when modal opens or switching to Login tab
   useEffect(() => {
     if (isOpen) {
-      const savedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY);
-      const savedPass = localStorage.getItem(REMEMBER_PASSWORD_KEY);
-      if (savedEmail) {
-        setEmail(savedEmail);
-        setRememberMe(true);
-      }
-      if (savedPass) {
-        setPassword(savedPass);
+      setError(null);
+      if (!isRegister) {
+        const savedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY);
+        const savedPass = localStorage.getItem(REMEMBER_PASSWORD_KEY);
+        if (savedEmail) {
+          setEmail(savedEmail);
+          setRememberMe(true);
+        }
+        if (savedPass) {
+          setPassword(savedPass);
+        }
+      } else {
+        // Reset inputs when switching to registration mode
+        setEmail('');
+        setPassword('');
+        setDisplayName('');
       }
     }
-  }, [isOpen]);
+  }, [isOpen, isRegister]);
 
   // Real-time requirement checks for registration
   const trimmedNameLength = displayName.trim().length;

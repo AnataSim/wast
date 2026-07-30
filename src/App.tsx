@@ -69,93 +69,45 @@ export class ErrorBoundary extends React.Component<
 export const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
   
-  const [items, setItems] = useState<WatchlistItem[]>(() => {
+  const [items, setItems] = useState<WatchlistItem[]>([]);
+
+  // Strictly isolate items per user UID to prevent cross-account item leaks
+  useEffect(() => {
+    if (!user) {
+      setItems([]);
+      return;
+    }
+
+    // 1. Try loading cached items for THIS user from local storage
+    const userStorageKey = `watchlist_items_${user.uid}`;
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed: WatchlistItem[] = JSON.parse(saved);
-        const seenIds = new Set<string>();
-        return parsed.map((item, idx) => {
-          let cleanId = item.id ? String(item.id) : `item_${Date.now()}_${idx}`;
-          if (seenIds.has(cleanId)) {
-            cleanId = `${cleanId}_dup_${Math.random().toString(36).substring(2, 7)}`;
-          }
-          seenIds.add(cleanId);
-          return { ...item, id: cleanId };
-        });
+      const cached = localStorage.getItem(userStorageKey);
+      if (cached) {
+        setItems(JSON.parse(cached));
+      } else {
+        setItems([]);
       }
     } catch (e) {
-      console.error('Gagal membaca data dari localStorage:', e);
+      setItems([]);
     }
-    return [];
-  });
 
-  // Persist items to localStorage whenever items state changes
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch (e) {
-      console.error('Gagal menyimpan data ke localStorage:', e);
-    }
-  }, [items]);
-
-  // Sync with Firestore if logged in (Hybrid merge to prevent wiping local data)
-  useEffect(() => {
-    if (!user) return;
+    // 2. Subscribe to real-time Firestore updates for THIS user
     const unsubscribe = subscribeToWatchlist(
-      user.uid, 
+      user.uid,
       (firestoreItems) => {
-        setItems((prevLocal) => {
-          const itemMap = new Map<string, WatchlistItem>();
-
-          // Populate with prevLocal items first
-          prevLocal.forEach((item) => itemMap.set(String(item.id), item));
-
-          firestoreItems.forEach((fItem) => {
-            const cleanId = String(fItem.id);
-            const existing = itemMap.get(cleanId);
-            if (!existing) {
-              itemMap.set(cleanId, { ...fItem, id: cleanId });
-            } else {
-              const fTime = new Date(fItem.updatedAt).getTime();
-              const lTime = new Date(existing.updatedAt).getTime();
-              if (fTime > lTime) {
-                // Firestore is strictly newer, but preserve local background position edit if present
-                itemMap.set(cleanId, {
-                  ...fItem,
-                  bannerPositionY: existing.bannerPositionY ?? fItem.bannerPositionY,
-                  id: cleanId,
-                });
-              } else {
-                // Keep local item (which has the updated bannerPositionY)
-                itemMap.set(cleanId, {
-                  ...fItem,
-                  ...existing,
-                  bannerPositionY: existing.bannerPositionY ?? fItem.bannerPositionY,
-                  id: cleanId,
-                });
-              }
-            }
-          });
-
-          const merged = Array.from(itemMap.values());
-
-          merged.forEach((item) => {
-            const existsInFirestore = firestoreItems.some((f) => String(f.id) === String(item.id));
-            if (!existsInFirestore) {
-              saveWatchlistItemToFirestore(user.uid, item).catch((err) => {
-                console.warn('Auto-upload local item to Firestore error:', err);
-              });
-            }
-          });
-
-          return merged;
-        });
+        // Authoritative source: Firestore items for user.uid
+        setItems(firestoreItems);
+        try {
+          localStorage.setItem(userStorageKey, JSON.stringify(firestoreItems));
+        } catch (e) {
+          console.warn('Gagal menyimpan cache lokal watchlist user:', e);
+        }
       },
       (err) => {
-        console.warn('Fallback ke mode lokal:', err);
+        console.warn('Gagal berlangganan watchlist Firestore:', err);
       }
     );
+
     return () => unsubscribe();
   }, [user]);
 
