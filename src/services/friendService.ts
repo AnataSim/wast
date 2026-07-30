@@ -262,7 +262,25 @@ export const searchUsernames = async (
   try {
     const resultsMap = new Map<string, UserSearchResult>();
 
-    // 1. Search 'usernames' collection
+    // 1. Direct document lookup in 'usernames' collection (e.g. doc ID = 's' or 'sim')
+    try {
+      const directDocSnap = await getDoc(doc(db, 'usernames', clean));
+      if (directDocSnap.exists()) {
+        const data = directDocSnap.data();
+        const uid = data.uid || directDocSnap.id;
+        const displayName = data.displayName || directDocSnap.id;
+        resultsMap.set(uid, {
+          uid,
+          displayName,
+          photoURL: data.photoURL || localStorage.getItem(`user_photo_${uid}`) || null,
+          isSelf: uid === currentUid,
+        });
+      }
+    } catch (e) {
+      console.warn('Direct username lookup error:', e);
+    }
+
+    // 2. Search 'usernames' collection
     try {
       const usernamesSnap = await getDocs(collection(db, 'usernames'));
       usernamesSnap.forEach((d) => {
@@ -286,7 +304,7 @@ export const searchUsernames = async (
       console.warn('Gagal membaca collection usernames:', e);
     }
 
-    // 2. Search 'users' collection (covers all accounts registered in database)
+    // 3. Search 'users' collection (covers all accounts registered in database)
     try {
       const usersSnap = await getDocs(collection(db, 'users'));
       usersSnap.forEach((d) => {

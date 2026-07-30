@@ -97,6 +97,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.warn('Gagal memuat profil dari Firestore:', e);
         }
 
+        // Ensure usernames and users document registry in Firestore is always synced
+        if (currentUser.displayName) {
+          const cleanName = currentUser.displayName.trim().toLowerCase();
+          setDoc(doc(db, 'usernames', cleanName), {
+            uid: currentUser.uid,
+            displayName: currentUser.displayName,
+            photoURL: photo || currentUser.photoURL || null,
+            updatedAt: new Date().toISOString(),
+          }, { merge: true }).catch(console.warn);
+
+          setDoc(doc(db, 'users', currentUser.uid), {
+            displayName: currentUser.displayName,
+            email: currentUser.email || '',
+            photoURL: photo || currentUser.photoURL || null,
+          }, { merge: true }).catch(console.warn);
+        }
+
         const patchedUser = Object.assign(
           Object.create(Object.getPrototypeOf(currentUser)),
           currentUser,
