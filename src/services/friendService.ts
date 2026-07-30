@@ -1,0 +1,243 @@
+import { 
+  collection, 
+  doc, 
+  setDoc, 
+  getDoc, 
+  getDocs, 
+  deleteDoc, 
+  onSnapshot, 
+  query, 
+  where 
+} from 'firebase/firestore';
+import { db } from '../config/firebase';
+import type { User } from 'firebase/auth';
+import type { WatchlistItem } from '../types/watchlist';
+
+export interface FriendRequest {
+  id: string;
+  fromUid: string;
+  fromUsername: string;
+  fromPhotoURL?: string | null;
+  toUid: string;
+  toUsername: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: string;
+}
+
+export interface FriendUser {
+  uid: string;
+  username: string;
+  photoURL?: string | null;
+  bannerURL?: string | null;
+  addedAt: string;
+}
+
+export interface FriendProfileData {
+  uid: string;
+  displayName: string;
+  photoURL?: string | null;
+  bannerURL?: string | null;
+  stats?: {
+    totalItems: number;
+    animeCount: number;
+    mangaCount: number;
+    watchingCount: number;
+    completedCount: number;
+  };
+}
+
+/**
+ * Sends a friend invitation to a target username.
+ */
+export const sendFriendInvitation = async (
+  fromUser: User, 
+  targetUsername: string
+): Promise<void> => {
+  const cleanTarget = targetUsername.trim().toLowerCase();
+  if (!cleanTarget) throw new Error('Masukkan username yang valid.');
+
+  // 1. Check if target username exists in 'usernames' collection
+  const usernameDocRef = doc(db, 'usernames', cleanTarget);
+  const usernameSnap = await getDoc(usernameDocRef);
+
+  if (!usernameSnap.exists()) {
+    throw new Error(`User dengan username "${targetUsername}" tidak ditemukan.`);
+  }
+
+  const targetData = usernameSnap.data();
+  const targetUid = targetData.uid;
+  const targetDisplayName = targetData.displayName || targetUsername;
+
+  if (targetUid === fromUser.uid) {
+    throw new Error('Kamu tidak dapat mengirim undangan ke diri sendiri.');
+  }
+
+  // 2. Check if already friends
+  const friendDocRef = doc(db, 'users', fromUser.uid, 'friends', targetUid);
+  const friendSnap = await getDoc(friendDocRef);
+  if (friendSnap.exists()) {
+    throw new Error(`Kamu sudah berteman dengan "${targetDisplayName}".`);
+  }
+
+  // 3. Check for existing pending request
+  const requestsCol = collection(db, 'friend_requests');
+  const existingReqQuery = query(
+    requestsCol, 
+    where('fromUid', '==', fromUser.uid),
+    where('toUid', '==', targetUid),
+    where('status', '==', 'pending')
+  );
+  const existingSnap = await getDocs(existingReqQuery);
+  if (!existingSnap.empty) {
+    throw new Error(`Undangan pertemanan ke "${targetDisplayName}" sudah dikirim sebelumnya.`);
+  }
+
+  // 4. Create new friend request
+  const requestId = `${fromUser.uid}_${targetUid}`;
+  const myPhoto = fromUser.photoURL || localStorage.getItem(`user_photo_${fromUser.uid}`);
+  const myName = fromUser.displayName || fromUser.email?.split('@')[0] || 'User';
+
+  const newRequest: Omit<FriendRequest, 'id'> = {
+    fromUid: fromUser.uid,
+    fromUsername: myName,
+    fromPhotoURL: myPhoto || null,
+    toUid: targetUid,
+    toUsername: targetDisplayName,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+  };
+
+  await setDoc(doc(db, 'friend_requests', requestId), newRequest);
+};
+
+/**
+ * Real-time subscription to incoming pending friend invitations.
+ */
+export const subscribeToIncomingRequests = (
+  uid: string, 
+  onData: (requests: FriendRequest[]) => void
+) => {
+  const requestsCol = collection(db, 'friend_requests');
+  const q = query(requestsCol, where('toUid', '==', uid), where('status', '==', 'pending'));
+
+  return onSnapshot(q, (snapshot) => {
+    const list: FriendRequest[] = [];
+    snapshot.forEach((d) => {
+      list.push({ id: d.id, ...d.data() } as FriendRequest);
+    });
+    onData(list);
+  }, (err) => console.warn('Gagal memuat undangan pertemanan:', err));
+};
+
+/**
+ * Real-time subscription to user's accepted friends list.
+ */
+export const subscribeToFriendsList = (
+  uid: string,
+  onData: (friends: FriendUser[]) => void
+) => {
+  const friendsCol = collection(db, 'users', uid, 'friends');
+
+  return onSnapshot(friendsCol, (snapshot) => {
+    const list: FriendUser[] = [];
+    snapshot.forEach((d) => {
+      list.push({ uid: d.id, ...d.data() } as FriendUser);
+    });
+    onData(list);
+  }, (err) => console.warn('Gagal memuat daftar teman:', err));
+};
+
+/**
+ * Accepts a friend invitation.
+ */
+export const acceptFriendInvitation = async (
+  currentUser: User,
+  request: FriendRequest
+): Promise<void> => {
+  const now = new Date().toISOString();
+  const myPhoto = currentUser.photoURL || localStorage.getItem(`user_photo_${currentUser.uid}`);
+  const myName = currentUser.displayName || currentUser.email?.split('@')[0] || 'User';
+
+  // 1. Add sender to recipient's friends subcollection
+  await setDoc(doc(db, 'users', currentUser.uid, 'friends', request.fromUid), {
+    uid: request.fromUid,
+    username: request.fromUsername,
+    photoURL: request.fromPhotoURL || null,
+    addedAt: now,
+  });
+
+  // 2. Add recipient to sender's friends subcollection
+  await setDoc(doc(db, 'users', request.fromUid, 'friends', currentUser.uid), {
+    uid: currentUser.uid,
+    username: myName,
+    photoURL: myPhoto || null,
+    addedAt: now,
+  });
+
+  // 3. Update request status to accepted
+  await setDoc(doc(db, 'friend_requests', request.id), { status: 'accepted' }, { merge: true });
+};
+
+/**
+ * Rejects/cancels a friend invitation.
+ */
+export const rejectFriendInvitation = async (requestId: string): Promise<void> => {
+  await deleteDoc(doc(db, 'friend_requests', requestId));
+};
+
+/**
+ * Fetches full profile data and stats of a friend.
+ */
+export const fetchFriendProfile = async (friendUid: string): Promise<FriendProfileData> => {
+  const userSnap = await getDoc(doc(db, 'users', friendUid));
+  const userData = userSnap.exists() ? userSnap.data() : {};
+
+  // Fetch friend's watchlist items to compute profile summary stats
+  const watchlistCol = collection(db, 'users', friendUid, 'watchlist');
+  const itemsSnap = await getDocs(watchlistCol);
+
+  let animeCount = 0;
+  let mangaCount = 0;
+  let watchingCount = 0;
+  let completedCount = 0;
+
+  itemsSnap.forEach((d) => {
+    const item = d.data();
+    if (item.type === 'anime') animeCount++;
+    else if (item.type === 'manga') mangaCount++;
+
+    if (item.status === 'watching') watchingCount++;
+    if (item.status === 'completed') completedCount++;
+  });
+
+  return {
+    uid: friendUid,
+    displayName: userData.displayName || 'User',
+    photoURL: userData.photoURL || localStorage.getItem(`user_photo_${friendUid}`),
+    bannerURL: userData.bannerURL || localStorage.getItem(`user_banner_${friendUid}`),
+    stats: {
+      totalItems: itemsSnap.size,
+      animeCount,
+      mangaCount,
+      watchingCount,
+      completedCount,
+    },
+  };
+};
+
+/**
+ * Fetches the watchlist items of a friend for the Inspect modal.
+ */
+export const fetchFriendWatchlist = async (friendUid: string): Promise<WatchlistItem[]> => {
+  const watchlistCol = collection(db, 'users', friendUid, 'watchlist');
+  const itemsSnap = await getDocs(watchlistCol);
+
+  const items: WatchlistItem[] = [];
+  itemsSnap.forEach((d) => {
+    const data = d.data();
+    const { _securityHeaders, _encryptedBackup, ...cleanItem } = data;
+    items.push({ id: d.id, ...cleanItem } as WatchlistItem);
+  });
+
+  return items;
+};

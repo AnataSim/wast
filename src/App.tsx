@@ -16,6 +16,10 @@ import {
   deleteWatchlistItemFromFirestore 
 } from './services/watchlistService';
 import { RefreshCw, AlertCircle, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
+import { FriendsPanel } from './components/FriendsPanel';
+import { FriendProfileModal } from './components/FriendProfileModal';
+import { InspectWatchlistModal } from './components/InspectWatchlistModal';
+import { subscribeToIncomingRequests, type FriendRequest, type FriendUser } from './services/friendService';
 
 const STORAGE_KEY = 'watchlist_anime_manga_tracker_empty_v3';
 
@@ -177,6 +181,21 @@ export const AppContent: React.FC = () => {
   // PNG Screenshot Export States
   const [isExporting, setIsExporting] = useState(false);
   const exportRef = useRef<HTMLDivElement>(null);
+
+  // Friends System States
+  const [isOpenMobileFriends, setIsOpenMobileFriends] = useState(false);
+  const [selectedFriendForProfile, setSelectedFriendForProfile] = useState<FriendUser | null>(null);
+  const [selectedFriendForInspect, setSelectedFriendForInspect] = useState<FriendUser | null>(null);
+  const [incomingRequests, setIncomingRequests] = useState<FriendRequest[]>([]);
+
+  useEffect(() => {
+    if (!user) {
+      setIncomingRequests([]);
+      return;
+    }
+    const unsub = subscribeToIncomingRequests(user.uid, (reqs) => setIncomingRequests(reqs));
+    return () => unsub();
+  }, [user]);
 
   // Visual Autosave Notification State
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -920,7 +939,14 @@ export const AppContent: React.FC = () => {
           totalCount={items.length}
           stats={profileStats}
           saveStatus={saveStatus}
+          onToggleFriendsPanel={() => setIsOpenMobileFriends((prev) => !prev)}
+          hasPendingInvitations={incomingRequests.length > 0}
         />
+
+        {/* Main Content + Friends Sidebar Layout */}
+        <div style={{ display: 'flex', flex: 1, minWidth: 0, position: 'relative' }}>
+          {/* Main Content Area */}
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
 
       {/* Centering container - export div shrinks to content during export */}
       <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -1065,6 +1091,29 @@ export const AppContent: React.FC = () => {
         </button>
       </footer>
       </div>
+
+      {/* Right Sidebar: Friends Panel */}
+      <FriendsPanel
+        user={user}
+        isOpenMobile={isOpenMobileFriends}
+        onToggleMobile={() => setIsOpenMobileFriends((prev) => !prev)}
+        onSelectFriend={(friend) => setSelectedFriendForProfile(friend)}
+      />
+      </div>
+
+      {/* Modals */}
+      <FriendProfileModal
+        friend={selectedFriendForProfile}
+        isOpen={!!selectedFriendForProfile}
+        onClose={() => setSelectedFriendForProfile(null)}
+        onInspect={(friend) => setSelectedFriendForInspect(friend)}
+      />
+
+      <InspectWatchlistModal
+        friend={selectedFriendForInspect}
+        isOpen={!!selectedFriendForInspect}
+        onClose={() => setSelectedFriendForInspect(null)}
+      />
     </div>
   );
 };

@@ -7,6 +7,7 @@ import {
   BookOpen,
   LogIn,
   User as UserIcon,
+  Users,
   SlidersHorizontal,
   ArrowUpDown,
   Check
@@ -29,6 +30,8 @@ interface HeaderProps {
     watchingCount: number;
   };
   saveStatus?: 'idle' | 'saving' | 'saved';
+  onToggleFriendsPanel?: () => void;
+  hasPendingInvitations?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -40,6 +43,8 @@ export const Header: React.FC<HeaderProps> = ({
   totalCount,
   stats,
   saveStatus = 'idle',
+  onToggleFriendsPanel,
+  hasPendingInvitations = false,
 }) => {
   const { user, userBanner, logout } = useAuth();
   const [isProfileCardOpen, setIsProfileCardOpen] = useState(false);
@@ -92,7 +97,45 @@ export const Header: React.FC<HeaderProps> = ({
         </a>
 
         {/* Right Controls: User Avatar / Login & Add Button */}
-        <div className="navbar-right-controls" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className="navbar-right-controls" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {user && (
+            <button
+              onClick={onToggleFriendsPanel}
+              title="Teman & Undangan"
+              className="friends-toggle-btn"
+              style={{
+                background: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '50%',
+                width: '36px',
+                height: '36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#fff',
+                cursor: 'pointer',
+                position: 'relative',
+              }}
+            >
+              <Users size={16} />
+              {hasPendingInvitations && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '-2px',
+                    right: '-2px',
+                    width: '10px',
+                    height: '10px',
+                    borderRadius: '50%',
+                    background: '#ef4444',
+                    border: '2px solid #0d1322',
+                    boxShadow: '0 0 8px #ef4444',
+                  }}
+                />
+              )}
+            </button>
+          )}
+
           {user ? (
             <div style={{ position: 'relative' }}>
               <button

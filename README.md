@@ -44,6 +44,13 @@ A state-of-the-art, premium anime and manga tracking application featuring glass
 - **One-Click PNG Export**: Render your active watchlist and stats into a high-quality showcase PNG image.
 - **Pagination-Aware Export**: Exports precisely the active page or full list as selected.
 
+### 👥 Friend System & Watchlist Inspection
+- **Username Invitation System**: Add friends by username via real-time invitations.
+- **Red Notification Badge**: Instant red dot alert when incoming invitations arrive.
+- **Friends Sidebar Panel**: Dedicated right-hand panel displaying online friends with mobile toggle button.
+- **Friend Profile Card**: View friends' avatar, banner, and summary statistics.
+- **Read-Only Inspect Mode**: View friends' watchlists (`[Username]'s Boothlisted`) in read-only mode with action buttons (+episodes, delete, edit, rating input, status changes) cleanly removed.
+
 ---
 
 ## 🛠️ Tech Stack
