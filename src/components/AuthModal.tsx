@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, LogIn, UserPlus, AlertCircle, CheckSquare, Square, ShieldAlert, Check } from 'lucide-react';
+import { X, LogIn, UserPlus, AlertCircle, CheckSquare, Square, ShieldAlert, Check, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const REMEMBER_EMAIL_KEY = 'watchlist_remembered_email_v1';
@@ -8,24 +8,34 @@ const REMEMBER_PASSWORD_KEY = 'watchlist_remembered_password_v1';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialTab?: 'login' | 'register';
 }
 
-export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
+export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'login' }) => {
   const { loginWithEmail, registerWithEmail, checkUsernameAvailable } = useAuth();
-  const [isRegister, setIsRegister] = useState(false);
+  const [isRegister, setIsRegister] = useState(initialTab === 'register');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const [isUsernameTaken, setIsUsernameTaken] = useState(false);
 
+  // Sync initialTab when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setIsRegister(initialTab === 'register');
+    }
+  }, [isOpen, initialTab]);
+
   // Auto-fill email & password only when modal opens or switching to Login tab
   useEffect(() => {
     if (isOpen) {
       setError(null);
+      setShowPassword(false);
       if (!isRegister) {
         const savedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY);
         const savedPass = localStorage.getItem(REMEMBER_PASSWORD_KEY);
@@ -242,7 +252,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           {isRegister && (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Username / Nama Lengkap</label>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Username</label>
                 <span style={{ fontSize: '0.72rem', color: isUsernameValid ? '#4ade80' : 'var(--text-muted)' }}>
                   3–20 karakter
                 </span>
@@ -250,7 +260,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               <input
                 type="text"
                 required
-                placeholder="Otaku Pro"
+                placeholder="OtakuPro"
                 className="input-clean"
                 style={{ width: '100%' }}
                 value={displayName}
@@ -286,16 +296,39 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
           <div>
             <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Kata Sandi</label>
-            <input
-              type="password"
-              required
-              autoComplete={isRegister ? "new-password" : "current-password"}
-              placeholder="••••••••"
-              className="input-clean"
-              style={{ width: '100%' }}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                autoComplete={isRegister ? "new-password" : "current-password"}
+                placeholder="••••••••"
+                className="input-clean"
+                style={{ width: '100%', paddingRight: '40px' }}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                title={showPassword ? 'Sembunyikan Kata Sandi' : 'Tampilkan Kata Sandi'}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '2px',
+                }}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
 
             {/* Registration password requirements checklist indicator */}
             {isRegister && (

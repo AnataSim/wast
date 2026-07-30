@@ -3,7 +3,7 @@ import { Film, LogIn, UserPlus, Star, ShieldCheck, Zap, BookOpen } from 'lucide-
 import { INITIAL_WATCHLIST } from '../data/mockData';
 
 interface WelcomeHeroProps {
-  onOpenAuthModal: () => void;
+  onOpenAuthModal: (mode?: 'login' | 'register') => void;
 }
 
 export const WelcomeHero: React.FC<WelcomeHeroProps> = ({ onOpenAuthModal }) => {
@@ -113,7 +113,7 @@ export const WelcomeHero: React.FC<WelcomeHeroProps> = ({ onOpenAuthModal }) => 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <button 
               className="pill-btn active btn-shimmer"
-              onClick={onOpenAuthModal}
+              onClick={() => onOpenAuthModal('login')}
               style={{ 
                 width: '100%', 
                 justifyContent: 'center', 
@@ -130,7 +130,7 @@ export const WelcomeHero: React.FC<WelcomeHeroProps> = ({ onOpenAuthModal }) => 
 
             <button 
               className="pill-btn"
-              onClick={onOpenAuthModal}
+              onClick={() => onOpenAuthModal('register')}
               style={{ 
                 width: '100%', 
                 justifyContent: 'center', 

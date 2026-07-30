@@ -126,9 +126,15 @@ export const AppContent: React.FC = () => {
 
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<WatchlistItem | null>(null);
   const [activeBgPickerId, setActiveBgPickerId] = useState<string | null>(null);
+
+  const handleOpenAuthModal = (mode: 'login' | 'register' = 'login') => {
+    setAuthModalMode(mode);
+    setIsAuthModalOpen(true);
+  };
 
   // PNG Screenshot Export States
   const [isExporting, setIsExporting] = useState(false);
@@ -864,10 +870,11 @@ export const AppContent: React.FC = () => {
     return (
       <>
         <CursorTrail />
-        <WelcomeHero onOpenAuthModal={() => setIsAuthModalOpen(true)} />
+        <WelcomeHero onOpenAuthModal={(mode) => handleOpenAuthModal(mode || 'login')} />
         <AuthModal
           isOpen={isAuthModalOpen}
           onClose={() => setIsAuthModalOpen(false)}
+          initialTab={authModalMode}
         />
       </>
     );
@@ -1043,6 +1050,7 @@ export const AppContent: React.FC = () => {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
+        initialTab={authModalMode}
       />
 
       <SettingsModal
