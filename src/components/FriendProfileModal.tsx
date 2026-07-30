@@ -170,15 +170,15 @@ export const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
               style={{
                 fontSize: '0.72rem',
                 fontWeight: 700,
-                color: '#38bdf8',
-                background: 'rgba(56, 189, 248, 0.12)',
-                border: '1px solid rgba(56, 189, 248, 0.3)',
+                color: displayName.trim().toLowerCase() === 's' ? '#38bdf8' : '#c084fc',
+                background: displayName.trim().toLowerCase() === 's' ? 'rgba(56, 189, 248, 0.12)' : 'rgba(168, 85, 247, 0.12)',
+                border: displayName.trim().toLowerCase() === 's' ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid rgba(168, 85, 247, 0.3)',
                 padding: '4px 12px',
                 borderRadius: '20px',
                 letterSpacing: '0.5px',
               }}
             >
-              Friend
+              {displayName.trim().toLowerCase() === 's' ? 'Owner' : 'Watcher'}
             </span>
           </div>
 

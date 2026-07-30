@@ -134,16 +134,16 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
 
           <div
             style={{
-              background: 'rgba(56, 189, 248, 0.1)',
-              border: '1px solid rgba(56, 189, 248, 0.25)',
-              color: 'var(--accent-cyan)',
+              background: nickname.trim().toLowerCase() === 's' ? 'rgba(56, 189, 248, 0.1)' : 'rgba(168, 85, 247, 0.12)',
+              border: nickname.trim().toLowerCase() === 's' ? '1px solid rgba(56, 189, 248, 0.25)' : '1px solid rgba(168, 85, 247, 0.3)',
+              color: nickname.trim().toLowerCase() === 's' ? 'var(--accent-cyan)' : '#c084fc',
               fontSize: '0.72rem',
               fontWeight: 700,
               padding: '3px 10px',
               borderRadius: '9999px',
             }}
           >
-            Owner
+            {nickname.trim().toLowerCase() === 's' ? 'Owner' : 'Watcher'}
           </div>
         </div>
 
