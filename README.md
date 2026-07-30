@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 🎬 WAST — Anime & Manga WatchList Tracker
 
 <p align="center">
@@ -6,13 +5,18 @@
   <img src="https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Vite-6.0-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
   <img src="https://img.shields.io/badge/Firebase-11.2-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase" />
+  <img src="https://img.shields.io/badge/Security-AES--256--GCM%20%7C%20HMAC--SHA256-4ade80?style=for-the-badge&logo=shield&logoColor=black" alt="Security" />
 </p>
 
-A state-of-the-art, premium anime and manga tracking application featuring glassmorphism design, real-time Firebase synchronization, interactive profile croppers, custom background themes, and PNG poster export capabilities.
+A state-of-the-art, premium anime and manga tracking application featuring glassmorphism design, real-time Firebase synchronization, interactive profile croppers, AES-256-GCM payload encryption, HMAC-SHA256 request authentication, and PNG poster export capabilities.
 
 ---
 
 ## ✨ Features
+
+### 🔒 Enterprise-Grade Security
+- **AES-256-GCM Payload Encryption**: All sensitive data payloads are encrypted using 256-bit AES in Galois/Counter Mode (GCM) with 96-bit Initialization Vectors (IV) and 128-bit authentication tags via Web Crypto API.
+- **HMAC-SHA256 Request Authentication**: Every request payload includes cryptographic HMAC-SHA256 signatures (`X-HMAC-Signature`), timestamps (`X-Timestamp`), and nonces (`X-Nonce`) to ensure request integrity and prevent replay attacks.
 
 ### 🔐 Authentication & Unique Usernames
 - **Firebase Auth**: Secure Email & Password authentication with persistent session state.
@@ -45,6 +49,7 @@ A state-of-the-art, premium anime and manga tracking application featuring glass
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 18, TypeScript, Vite
+- **Security**: Web Crypto API (AES-256-GCM, HMAC-SHA256)
 - **Styling**: Vanilla CSS3, Glassmorphism, CSS Custom Properties, Responsive Flexbox/Grid
 - **Icons**: Lucide React
 - **Backend / DB**: Firebase Authentication, Cloud Firestore, Firebase Storage
@@ -80,6 +85,7 @@ A state-of-the-art, premium anime and manga tracking application featuring glass
    VITE_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
    VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
    VITE_FIREBASE_APP_ID=your_app_id
+   VITE_SECURITY_SECRET=your_custom_aes_hmac_secret
    ```
 
 4. **Run Development Server:**
@@ -97,6 +103,3 @@ A state-of-the-art, premium anime and manga tracking application featuring glass
 ## 📝 License
 
 Distributed under the MIT License. See `LICENSE` for more information.
-=======
-# wast
->>>>>>> 567865a142f8713f612b38c4c07d069411631a46

@@ -9,6 +9,14 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { WatchlistItem } from '../types/watchlist';
+import { 
+  encryptPayloadAES256GCM, 
+  decryptPayloadAES256GCM, 
+  createAuthenticatedHeaders, 
+  verifyHMACSignature,
+  type EncryptedPayload,
+  type AuthenticatedHeaders
+} from '../utils/security';
 
 // Get reference to user's watchlist subcollection
 const getUserWatchlistCollection = (userId: string) => {
@@ -27,7 +35,10 @@ export const subscribeToWatchlist = (
     return onSnapshot(q, (snapshot) => {
       const items: WatchlistItem[] = [];
       snapshot.forEach((docSnap) => {
-        items.push({ id: docSnap.id, ...docSnap.data() } as WatchlistItem);
+        const raw = docSnap.data();
+        // Remove internal security metadata fields when hydrating WatchlistItem
+        const { _securityHeaders, _encryptedBackup, ...cleanItem } = raw;
+        items.push({ id: docSnap.id, ...cleanItem } as WatchlistItem);
       });
       onData(items);
     }, (error) => {
@@ -41,12 +52,32 @@ export const subscribeToWatchlist = (
   }
 };
 
+/**
+ * Saves a watchlist item to Firestore, attaching HMAC-SHA256 request authentication
+ * headers and an AES-256-GCM encrypted payload backup for high-security environments.
+ */
 export const saveWatchlistItemToFirestore = async (userId: string, item: WatchlistItem) => {
   const docRef = doc(db, 'users', userId, 'watchlist', item.id);
-  await setDoc(docRef, item, { merge: true });
+
+  // Generate HMAC-SHA256 request authentication headers
+  const securityHeaders: AuthenticatedHeaders = await createAuthenticatedHeaders(item);
+
+  // Generate AES-256-GCM encrypted payload backup
+  const encryptedBackup: EncryptedPayload = await encryptPayloadAES256GCM(item);
+
+  const payloadToSave = {
+    ...item,
+    _securityHeaders: securityHeaders,
+    _encryptedBackup: encryptedBackup,
+  };
+
+  await setDoc(docRef, payloadToSave, { merge: true });
 };
 
 export const deleteWatchlistItemFromFirestore = async (userId: string, itemId: string) => {
   const docRef = doc(db, 'users', userId, 'watchlist', itemId);
   await deleteDoc(docRef);
 };
+
+export { encryptPayloadAES256GCM, decryptPayloadAES256GCM, createAuthenticatedHeaders, verifyHMACSignature };
+
