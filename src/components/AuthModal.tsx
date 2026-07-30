@@ -39,15 +39,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTa
       if (!isRegister) {
         const savedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY);
         const savedPass = localStorage.getItem(REMEMBER_PASSWORD_KEY);
-        if (savedEmail && !savedEmail.toLowerCase().includes('rioagustiawan80')) {
+        if (savedEmail) {
           setEmail(savedEmail);
           setRememberMe(true);
           if (savedPass) setPassword(savedPass);
-        } else {
-          localStorage.removeItem(REMEMBER_EMAIL_KEY);
-          localStorage.removeItem(REMEMBER_PASSWORD_KEY);
-          setEmail('');
-          setPassword('');
         }
       } else {
         // Reset inputs when switching to registration mode

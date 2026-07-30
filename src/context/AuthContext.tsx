@@ -71,33 +71,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Ensure persistence is set to LOCAL by default so user stays logged in across sessions
     setPersistence(auth, browserLocalPersistence).catch(console.error);
 
-    // Purge any stored credentials or keys containing rioagustiawan80
-    try {
-      const savedEmail = localStorage.getItem('watchlist_remembered_email_v1');
-      if (savedEmail && savedEmail.toLowerCase().includes('rioagustiawan80')) {
-        localStorage.removeItem('watchlist_remembered_email_v1');
-        localStorage.removeItem('watchlist_remembered_password_v1');
-      }
-      Object.keys(localStorage).forEach((key) => {
-        if (key.toLowerCase().includes('rioagustiawan80') || localStorage.getItem(key)?.toLowerCase().includes('rioagustiawan80')) {
-          localStorage.removeItem(key);
-        }
-      });
-    } catch (e) {
-      console.warn('Gagal membersihkan cache rioagustiawan80:', e);
-    }
-
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        // If current logged-in user is rioagustiawan80, log out immediately
-        if (currentUser.email?.toLowerCase().includes('rioagustiawan80')) {
-          await signOut(auth);
-          setUser(null);
-          setUserBanner(null);
-          setLoading(false);
-          return;
-        }
-
         let photo = currentUser.photoURL;
         let banner = localStorage.getItem(`user_banner_${currentUser.uid}`);
 
