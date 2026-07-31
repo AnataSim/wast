@@ -103,6 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setDoc(doc(db, 'usernames', cleanName), {
             uid: currentUser.uid,
             displayName: currentUser.displayName,
+            email: currentUser.email || '',
             photoURL: photo || currentUser.photoURL || null,
             updatedAt: new Date().toISOString(),
           }, { merge: true }).catch(console.warn);
@@ -130,10 +131,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => unsubscribe();
   }, []);
 
-  const loginWithEmail = async (email: string, pass: string, rememberMe = true) => {
+  const loginWithEmail = async (emailOrUsername: string, pass: string, rememberMe = true) => {
+    const clean = emailOrUsername.trim();
+    if (!clean) throw new Error('Masukkan username atau email.');
+
+    let targetEmail = clean;
+
+    // If identifier doesn't contain '@', resolve username to email from Firestore
+    if (!clean.includes('@')) {
+      const cleanUsername = clean.toLowerCase();
+      try {
+        const usernameSnap = await getDoc(doc(db, 'usernames', cleanUsername));
+        if (usernameSnap.exists()) {
+          const uData = usernameSnap.data();
+          if (uData?.email) {
+            targetEmail = uData.email;
+          } else if (uData?.uid) {
+            const userSnap = await getDoc(doc(db, 'users', uData.uid));
+            if (userSnap.exists() && userSnap.data()?.email) {
+              targetEmail = userSnap.data().email;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Username lookup error in usernames collection:', e);
+      }
+
+      if (targetEmail === clean) {
+        try {
+          const { getDocs, collection } = await import('firebase/firestore');
+          const usersSnap = await getDocs(collection(db, 'users'));
+          usersSnap.forEach((d) => {
+            const data = d.data();
+            const name = (data.displayName || '').trim().toLowerCase();
+            if ((name === cleanUsername || d.id === cleanUsername) && data.email) {
+              targetEmail = data.email;
+            }
+          });
+        } catch (e) {
+          console.warn('Username lookup error in users collection:', e);
+        }
+      }
+
+      if (targetEmail === clean || !targetEmail.includes('@')) {
+        throw new Error(`Username "${clean}" tidak ditemukan. Harap periksa kembali atau gunakan email.`);
+      }
+    }
+
     const persistenceMode = rememberMe ? browserLocalPersistence : browserSessionPersistence;
     await setPersistence(auth, persistenceMode);
-    await signInWithEmailAndPassword(auth, email, pass);
+    await signInWithEmailAndPassword(auth, targetEmail, pass);
   };
 
   const registerWithEmail = async (email: string, pass: string, name: string) => {
@@ -156,6 +203,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await setDoc(doc(db, 'usernames', clean), {
           uid,
           displayName: trimmedName,
+          email: email.trim(),
           createdAt: new Date().toISOString()
         });
         await setDoc(doc(db, 'users', uid), { 

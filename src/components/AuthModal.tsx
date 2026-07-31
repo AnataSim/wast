@@ -126,7 +126,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTa
       if (err.code === 'auth/email-already-in-use') {
         setError('Email sudah terdaftar.');
       } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
-        setError('Email atau kata sandi salah. Silakan periksa kembali.');
+        setError('Username / Email atau kata sandi salah. Silakan periksa kembali.');
       } else if (err.code === 'auth/weak-password') {
         setError('Kata sandi terlalu lemah. Gunakan minimal 6 karakter.');
       } else if (err.code === 'auth/invalid-email') {
@@ -276,12 +276,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTa
           )}
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Alamat Email</label>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+              {isRegister ? 'Alamat Email' : 'Username atau Alamat Email'}
+            </label>
             <input
-              type="email"
+              type={isRegister ? "email" : "text"}
               required
               autoComplete={isRegister ? "new-password" : "username email"}
-              placeholder="user@example.com"
+              placeholder={isRegister ? "user@example.com" : "Username atau Email (contoh: sim atau user@example.com)"}
               className="input-clean"
               style={{ width: '100%' }}
               value={email}
