@@ -59,8 +59,8 @@ export const CursorTrail: React.FC = () => {
       }
     };
 
-    // Instant zero-delay 1:1 sub-pixel pointer interpolation (2.5px step)
-    const processPoint = (x: number, y: number) => {
+    // Instant zero-delay 1:1 sub-pixel pointer tracking (2.5px step distance)
+    const updatePointer = (x: number, y: number) => {
       isPointerActive = true;
 
       if (lastX < 0) {
@@ -99,22 +99,29 @@ export const CursorTrail: React.FC = () => {
       }
     };
 
-    // Hardware Pointer Event Listener (supports 240Hz/480Hz digitizer sampling via coalesced events)
-    const handlePointerMove = (e: PointerEvent) => {
-      const events = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : [e];
-      for (let i = 0; i < events.length; i++) {
-        processPoint(events[i].clientX, events[i].clientY);
+    const handleMouseMove = (e: MouseEvent) => {
+      updatePointer(e.clientX, e.clientY);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches && e.touches.length > 0) {
+        const touch = e.touches[0];
+        updatePointer(touch.clientX, touch.clientY);
       }
     };
 
-    const handlePointerDown = (e: PointerEvent) => {
-      lastX = e.clientX;
-      lastY = e.clientY;
-      processPoint(e.clientX, e.clientY);
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches && e.touches.length > 0) {
+        const touch = e.touches[0];
+        lastX = touch.clientX;
+        lastY = touch.clientY;
+        updatePointer(touch.clientX, touch.clientY);
+      }
     };
 
-    window.addEventListener('pointermove', handlePointerMove, { passive: true });
-    window.addEventListener('pointerdown', handlePointerDown, { passive: true });
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
 
     // Render Loop - 1:1 PC identical ultra-dense gapless rendering
     const render = () => {
@@ -163,8 +170,9 @@ export const CursorTrail: React.FC = () => {
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchstart', handleTouchStart);
       if (idleTimer) clearTimeout(idleTimer);
       if (animId) cancelAnimationFrame(animId);
     };
