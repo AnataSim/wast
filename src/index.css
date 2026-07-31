@@ -545,7 +545,18 @@ body {
     right: 4px !important;
   }
 
-  /* Modal Sheet Effect for Mobile */
+  /* Modal Sheet & Profile Popover Effect for Mobile */
+  .profile-card-popover {
+    position: fixed !important;
+    top: 60px !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+    margin: 0 auto !important;
+    z-index: 9999 !important;
+  }
+
   .modal-overlay {
     padding: 10px !important;
     align-items: flex-end !important;

@@ -16,6 +16,15 @@ export const CursorTrail: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
+    // On mobile touch devices, disable cursor trail to prevent touch-drag stutter and ensure silky-smooth 60/120fps scrolling
+    const isTouchDevice = typeof window !== 'undefined' && (
+      'ontouchstart' in window ||
+      (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) ||
+      window.matchMedia('(pointer: coarse)').matches
+    );
+
+    if (isTouchDevice) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 

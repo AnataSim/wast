@@ -45,6 +45,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
   return (
     <div
       ref={cardRef}
+      className="profile-card-popover"
       style={{
         position: 'absolute',
         top: 'calc(100% + 8px)',
