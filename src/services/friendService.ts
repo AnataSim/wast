@@ -227,14 +227,50 @@ export const rejectFriendInvitation = async (requestId: string): Promise<void> =
 };
 
 /**
+ * Helper to resolve synthetic UIDs (like 'uid_sim' or username) to the actual Firestore user UID
+ */
+export async function resolveRealUserUid(friendUid: string, username?: string): Promise<string> {
+  if (friendUid && !friendUid.startsWith('uid_')) {
+    const userSnap = await getDoc(doc(db, 'users', friendUid));
+    if (userSnap.exists()) return friendUid;
+  }
+
+  const targetName = (username || friendUid.replace(/^uid_/, '')).trim().toLowerCase();
+  if (!targetName) return friendUid;
+
+  try {
+    const uSnap = await getDoc(doc(db, 'usernames', targetName));
+    if (uSnap.exists() && uSnap.data()?.uid) {
+      return uSnap.data().uid;
+    }
+  } catch (e) {}
+
+  try {
+    const usersSnap = await getDocs(collection(db, 'users'));
+    let foundUid = '';
+    usersSnap.forEach((d) => {
+      const data = d.data();
+      const name = (data.displayName || data.email?.split('@')[0] || '').toLowerCase();
+      if (name === targetName || d.id === targetName) {
+        foundUid = d.id;
+      }
+    });
+    if (foundUid) return foundUid;
+  } catch (e) {}
+
+  return friendUid;
+}
+
+/**
  * Fetches full profile data and stats of a friend.
  */
-export const fetchFriendProfile = async (friendUid: string): Promise<FriendProfileData> => {
-  const userSnap = await getDoc(doc(db, 'users', friendUid));
+export const fetchFriendProfile = async (friendUid: string, username?: string): Promise<FriendProfileData> => {
+  const realUid = await resolveRealUserUid(friendUid, username);
+  const userSnap = await getDoc(doc(db, 'users', realUid));
   const userData = userSnap.exists() ? userSnap.data() : {};
 
   // Fetch friend's watchlist items to compute profile summary stats
-  const watchlistCol = collection(db, 'users', friendUid, 'watchlist');
+  const watchlistCol = collection(db, 'users', realUid, 'watchlist');
   const itemsSnap = await getDocs(watchlistCol);
 
   let animeCount = 0;
@@ -252,10 +288,10 @@ export const fetchFriendProfile = async (friendUid: string): Promise<FriendProfi
   });
 
   return {
-    uid: friendUid,
-    displayName: userData.displayName || 'User',
-    photoURL: userData.photoURL || localStorage.getItem(`user_photo_${friendUid}`),
-    bannerURL: userData.bannerURL || localStorage.getItem(`user_banner_${friendUid}`),
+    uid: realUid,
+    displayName: userData.displayName || username || 'User',
+    photoURL: userData.photoURL || localStorage.getItem(`user_photo_${realUid}`),
+    bannerURL: userData.bannerURL || localStorage.getItem(`user_banner_${realUid}`),
     stats: {
       totalItems: itemsSnap.size,
       animeCount,
@@ -267,10 +303,11 @@ export const fetchFriendProfile = async (friendUid: string): Promise<FriendProfi
 };
 
 /**
- * Fetches the watchlist items of a friend for the Inspect modal.
+ * Fetches the watchlist items of a friend for the Inspect mode.
  */
-export const fetchFriendWatchlist = async (friendUid: string): Promise<WatchlistItem[]> => {
-  const watchlistCol = collection(db, 'users', friendUid, 'watchlist');
+export const fetchFriendWatchlist = async (friendUid: string, username?: string): Promise<WatchlistItem[]> => {
+  const realUid = await resolveRealUserUid(friendUid, username);
+  const watchlistCol = collection(db, 'users', realUid, 'watchlist');
   const itemsSnap = await getDocs(watchlistCol);
 
   const items: WatchlistItem[] = [];

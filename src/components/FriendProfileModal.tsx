@@ -21,7 +21,7 @@ export const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
   useEffect(() => {
     if (isOpen && friend) {
       setLoading(true);
-      fetchFriendProfile(friend.uid)
+      fetchFriendProfile(friend.uid, friend.username)
         .then((data) => setProfile(data))
         .catch((err) => console.warn('Gagal memuat profil teman:', err))
         .finally(() => setLoading(false));

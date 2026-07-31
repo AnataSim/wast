@@ -65,11 +65,14 @@ export const saveWatchlistItemToFirestore = async (userId: string, item: Watchli
   // Generate AES-256-GCM encrypted payload backup
   const encryptedBackup: EncryptedPayload = await encryptPayloadAES256GCM(item);
 
-  const payloadToSave = {
+  const rawPayload = {
     ...item,
     _securityHeaders: securityHeaders,
     _encryptedBackup: encryptedBackup,
   };
+
+  // Remove any keys with undefined values to prevent Firestore 'Unsupported field value: undefined' errors
+  const payloadToSave = JSON.parse(JSON.stringify(rawPayload));
 
   await setDoc(docRef, payloadToSave, { merge: true });
 };

@@ -19,6 +19,7 @@ import { RefreshCw, AlertCircle, ChevronLeft, ChevronRight, Layers } from 'lucid
 import { FriendsPanel } from './components/FriendsPanel';
 import { FriendProfileModal } from './components/FriendProfileModal';
 import { InspectWatchlistModal } from './components/InspectWatchlistModal';
+import { InspectWatchlistPage } from './components/InspectWatchlistPage';
 import { subscribeToIncomingRequests, type FriendRequest, type FriendUser } from './services/friendService';
 
 
@@ -879,7 +880,22 @@ export const AppContent: React.FC = () => {
     );
   }
 
-  // 2. LOGGED-IN AUTHENTICATED VIEW: Full App Shell + Navbar + Stats + Watchlist Table
+  // 2. LOGGED-IN AUTHENTICATED VIEW
+  if (selectedFriendForInspect) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+        <CursorTrail />
+        <AnimatedBackground />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <InspectWatchlistPage
+            friend={selectedFriendForInspect}
+            onBackToLobby={() => setSelectedFriendForInspect(null)}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
       <CursorTrail />
