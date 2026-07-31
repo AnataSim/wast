@@ -117,25 +117,28 @@ export const CursorTrail: React.FC = () => {
     const render = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 1. Process movement interpolation smoothly inside requestAnimationFrame frame tick
+      // 1. Smoothly glide currX/currY towards targetX/targetY every single frame tick
       if (isPointerActive && targetX >= 0) {
+        const easeFactor = 0.45; // Smooth fluid spring factor
         const dx = targetX - currX;
         const dy = targetY - currY;
         const dist = Math.hypot(dx, dy);
 
-        if (dist >= stepDistance) {
-          const steps = Math.min(Math.floor(dist / stepDistance), 30);
-          for (let i = 1; i <= steps; i++) {
-            const px = currX + (dx / steps) * i;
-            const py = currY + (dy / steps) * i;
+        if (dist > 0.5) {
+          const stepX = dx * easeFactor;
+          const stepY = dy * easeFactor;
+          const stepDist = Math.hypot(stepX, stepY);
+
+          // Spawn 1 to 3 dots max per frame tick for liquid-smooth fluid motion
+          const dotCount = Math.max(1, Math.min(Math.floor(stepDist / stepDistance), 3));
+          for (let i = 1; i <= dotCount; i++) {
+            const px = currX + (stepX / dotCount) * i;
+            const py = currY + (stepY / dotCount) * i;
             spawnDot(px, py, dotRadius);
           }
-          currX = targetX;
-          currY = targetY;
-        } else if (dist > 0.5) {
-          spawnDot(targetX, targetY, dotRadius);
-          currX = targetX;
-          currY = targetY;
+
+          currX += stepX;
+          currY += stepY;
         }
       }
 
