@@ -22,21 +22,15 @@ export const CursorTrail: React.FC = () => {
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
-    const maxDots = 120;
-    const stepDistance = 2.8;
+    const maxDots = 140;
+    const stepDistance = 2.5;
     const decayRate = 0.038;
     const dotRadius = 7.5;
 
     let animId: number | null = null;
     let dots: TrailDot[] = [];
-
-    // Target pointer coordinates set by mouse/touch events
-    let targetX = -100;
-    let targetY = -100;
-    // Current interpolated trail coordinates processed per animation frame
-    let currX = -100;
-    let currY = -100;
-
+    let lastX = -100;
+    let lastY = -100;
     let isPointerActive = false;
     let idleTimer: any = null;
 
@@ -65,22 +59,38 @@ export const CursorTrail: React.FC = () => {
       }
     };
 
-    // Instant zero-cost pointer target updater (no heavy processing in event handlers)
-    const setPointerTarget = (x: number, y: number) => {
+    // Instant zero-delay 1:1 sub-pixel pointer interpolation (2.5px step)
+    const processPoint = (x: number, y: number) => {
       isPointerActive = true;
-      targetX = x;
-      targetY = y;
 
-      if (currX < 0) {
-        currX = x;
-        currY = y;
+      if (lastX < 0) {
+        lastX = x;
+        lastY = y;
       }
+
+      const dx = x - lastX;
+      const dy = y - lastY;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist >= stepDistance) {
+        const steps = Math.floor(dist / stepDistance);
+        for (let i = 1; i <= steps; i++) {
+          const px = lastX + dx * (i / steps);
+          const py = lastY + dy * (i / steps);
+          spawnDot(px, py, dotRadius);
+        }
+      } else {
+        spawnDot(x, y, dotRadius);
+      }
+
+      lastX = x;
+      lastY = y;
 
       if (idleTimer) clearTimeout(idleTimer);
       idleTimer = setTimeout(() => {
         isPointerActive = false;
-        currX = -100;
-        currY = -100;
+        lastX = -100;
+        lastY = -100;
       }, 500);
 
       // Start render loop immediately if paused
@@ -89,61 +99,28 @@ export const CursorTrail: React.FC = () => {
       }
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
-      setPointerTarget(e.clientX, e.clientY);
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        const touch = e.touches[0];
-        setPointerTarget(touch.clientX, touch.clientY);
+    // Hardware Pointer Event Listener (supports 240Hz/480Hz digitizer sampling via coalesced events)
+    const handlePointerMove = (e: PointerEvent) => {
+      const events = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : [e];
+      for (let i = 0; i < events.length; i++) {
+        processPoint(events[i].clientX, events[i].clientY);
       }
     };
 
-    const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        const touch = e.touches[0];
-        currX = touch.clientX;
-        currY = touch.clientY;
-        setPointerTarget(touch.clientX, touch.clientY);
-      }
+    const handlePointerDown = (e: PointerEvent) => {
+      lastX = e.clientX;
+      lastY = e.clientY;
+      processPoint(e.clientX, e.clientY);
     };
 
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    window.addEventListener('touchmove', handleTouchMove, { passive: true });
-    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('pointermove', handlePointerMove, { passive: true });
+    window.addEventListener('pointerdown', handlePointerDown, { passive: true });
 
-    // Render Loop - Frame-synced ultra-dense gapless rendering (60/120/144 FPS)
+    // Render Loop - 1:1 PC identical ultra-dense gapless rendering
     const render = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 1. Smoothly glide currX/currY towards targetX/targetY every single frame tick
-      if (isPointerActive && targetX >= 0) {
-        const easeFactor = 0.45; // Smooth fluid spring factor
-        const dx = targetX - currX;
-        const dy = targetY - currY;
-        const dist = Math.hypot(dx, dy);
-
-        if (dist > 0.5) {
-          const stepX = dx * easeFactor;
-          const stepY = dy * easeFactor;
-          const stepDist = Math.hypot(stepX, stepY);
-
-          // Spawn 1 to 3 dots max per frame tick for liquid-smooth fluid motion
-          const dotCount = Math.max(1, Math.min(Math.floor(stepDist / stepDistance), 3));
-          for (let i = 1; i <= dotCount; i++) {
-            const px = currX + (stepX / dotCount) * i;
-            const py = currY + (stepY / dotCount) * i;
-            spawnDot(px, py, dotRadius);
-          }
-
-          currX += stepX;
-          currY += stepY;
-        }
-      }
-
-      // 2. Render fading dense trail dots
-      if (dots.length > 0) {
+      if (dots.length > 0 || isPointerActive) {
         ctx.save();
         ctx.globalCompositeOperation = 'lighter'; // Neon additive blending
 
@@ -186,9 +163,8 @@ export const CursorTrail: React.FC = () => {
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerdown', handlePointerDown);
       if (idleTimer) clearTimeout(idleTimer);
       if (animId) cancelAnimationFrame(animId);
     };
