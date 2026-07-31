@@ -79,6 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const cachedPhoto = localStorage.getItem(`user_photo_${currentUser.uid}`);
         if (cachedPhoto) photo = cachedPhoto;
 
+        let displayName = currentUser.displayName;
         try {
           const userDocRef = doc(db, 'users', currentUser.uid);
           const userSnap = await getDoc(userDocRef);
@@ -92,25 +93,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               banner = data.bannerURL;
               localStorage.setItem(`user_banner_${currentUser.uid}`, data.bannerURL);
             }
+            if (!displayName && data?.displayName) {
+              displayName = data.displayName;
+            }
           }
         } catch (e) {
           console.warn('Gagal memuat profil dari Firestore:', e);
         }
 
+        const activeName = displayName || currentUser.email?.split('@')[0] || '';
+        const userEmail = currentUser.email || '';
+
         // Ensure usernames and users document registry in Firestore is always synced
-        if (currentUser.displayName) {
-          const cleanName = currentUser.displayName.trim().toLowerCase();
-          setDoc(doc(db, 'usernames', cleanName), {
+        if (activeName) {
+          const cleanName = activeName.trim().toLowerCase();
+          const usernamePayload = {
             uid: currentUser.uid,
-            displayName: currentUser.displayName,
-            email: currentUser.email || '',
+            displayName: activeName.trim(),
+            email: userEmail,
             photoURL: photo || currentUser.photoURL || null,
             updatedAt: new Date().toISOString(),
-          }, { merge: true }).catch(console.warn);
+          };
+
+          setDoc(doc(db, 'usernames', cleanName), usernamePayload, { merge: true }).catch(console.warn);
+
+          // Also register email prefix as alias if different (e.g. rioagustiawan10188)
+          if (userEmail.includes('@')) {
+            const emailPrefix = userEmail.split('@')[0].trim().toLowerCase();
+            if (emailPrefix && emailPrefix !== cleanName) {
+              setDoc(doc(db, 'usernames', emailPrefix), usernamePayload, { merge: true }).catch(console.warn);
+            }
+          }
 
           setDoc(doc(db, 'users', currentUser.uid), {
-            displayName: currentUser.displayName,
-            email: currentUser.email || '',
+            displayName: activeName.trim(),
+            email: userEmail,
             photoURL: photo || currentUser.photoURL || null,
           }, { merge: true }).catch(console.warn);
         }
@@ -174,7 +191,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (targetEmail === clean || !targetEmail.includes('@')) {
-        throw new Error(`Username "${clean}" tidak ditemukan. Harap periksa kembali atau gunakan email.`);
+        throw new Error(`Username "${clean}" belum terdaftar / disinkronkan. Jika akun dibuat sebelumnya, silakan login 1x menggunakan Alamat Email untuk menyinkronkan username Anda.`);
       }
     }
 

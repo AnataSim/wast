@@ -289,6 +289,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTa
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+            {!isRegister && (
+              <span style={{ display: 'block', marginTop: '4px', fontSize: '0.73rem', color: 'var(--text-muted)' }}>
+                💡 Kamu bisa masuk menggunakan <strong>Username</strong> atau <strong>Alamat Email</strong> Anda.
+              </span>
+            )}
           </div>
 
           <div>
