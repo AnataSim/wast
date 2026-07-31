@@ -208,7 +208,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="main-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px 16px' }}>
         
         {/* Row 1: Section Title Left & Segmented Category Tabs Right */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+        <div className="mobile-title-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
           <h1 className="section-title">
             Koleksi Anime &amp; Manga
             <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500, marginLeft: '8px' }}>
@@ -217,7 +217,7 @@ export const Header: React.FC<HeaderProps> = ({
           </h1>
 
           {/* Segmented Category Buttons */}
-          <div style={{ display: 'flex', background: 'var(--bg-card)', padding: '4px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', gap: '4px' }}>
+          <div className="mobile-category-tabs" style={{ display: 'flex', background: 'var(--bg-card)', padding: '4px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', gap: '4px' }}>
             {categoryTabs.map((tab) => {
               const isActive = filter.category === tab.value;
               return (

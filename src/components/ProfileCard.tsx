@@ -49,13 +49,15 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
         position: 'absolute',
         top: 'calc(100% + 8px)',
         right: 0,
-        width: '320px',
+        width: 'min(320px, calc(100vw - 24px))',
+        maxWidth: 'calc(100vw - 24px)',
         background: '#0d1322',
         border: '1px solid rgba(255, 255, 255, 0.12)',
         borderRadius: '16px',
         boxShadow: '0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 130, 246, 0.2)',
         overflow: 'hidden',
         zIndex: 1000,
+        boxSizing: 'border-box',
       }}
     >
       {/* Profile Banner */}
@@ -79,7 +81,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
       {/* Profile Info Area */}
       <div style={{ padding: '0 16px 16px', position: 'relative', marginTop: '-36px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '12px' }}>
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: 'relative', flexShrink: 0 }}>
             {user.photoURL ? (
               <img
                 src={user.photoURL}
@@ -141,6 +143,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
               fontWeight: 700,
               padding: '3px 10px',
               borderRadius: '9999px',
+              flexShrink: 0,
             }}
           >
             {nickname.trim().toLowerCase() === 's' ? 'Owner' : 'Watcher'}
@@ -148,7 +151,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
         </div>
 
         {/* Nickname & Email */}
-        <div style={{ marginBottom: '14px' }}>
+        <div style={{ marginBottom: '14px', width: '100%', overflow: 'hidden' }}>
           <h3
             style={{
               fontSize: '1.1rem',
@@ -156,11 +159,26 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
               color: '#ffffff',
               lineHeight: 1.2,
               marginBottom: '2px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              wordBreak: 'break-all',
             }}
+            title={nickname}
           >
             {nickname}
           </h3>
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+          <p 
+            style={{ 
+              fontSize: '0.78rem', 
+              color: 'var(--text-muted)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              wordBreak: 'break-all',
+            }}
+            title={email}
+          >
             {email}
           </p>
         </div>

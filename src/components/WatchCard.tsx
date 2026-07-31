@@ -456,7 +456,7 @@ export const WatchCard: React.FC<WatchCardProps> = ({
         </div>
 
         {/* 5. Action Buttons Column (Flexible width to fit all 5 action buttons) */}
-        <div style={{ minWidth: '145px', display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0, position: 'relative' }}>
+        <div className="card-action-btns-group" style={{ minWidth: '145px', display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0, position: 'relative' }}>
           {item.progress.currentEpisode === 0 ? (
             <button
               onClick={handleQuickProgress}
@@ -602,7 +602,7 @@ export const WatchCard: React.FC<WatchCardProps> = ({
           </button>
 
           {/* Reorder Up / Down Chevron Buttons (Floating Outside Card Bar on Right) */}
-          <div style={{
+          <div className="card-reorder-chevrons" style={{
             position: 'absolute',
             right: '-24px',
             top: '50%',
