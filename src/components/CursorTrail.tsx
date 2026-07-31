@@ -22,17 +22,11 @@ export const CursorTrail: React.FC = () => {
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
-    const isTouchDevice = typeof window !== 'undefined' && (
-      'ontouchstart' in window ||
-      (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) ||
-      window.innerWidth < 768
-    );
-
-    // Adaptive performance tuning: lighter & faster for mobile touch
-    const maxDots = isTouchDevice ? 25 : 120;
-    const stepDistance = isTouchDevice ? 12 : 3;
-    const decayRate = isTouchDevice ? 0.065 : 0.038;
-    const dotRadius = isTouchDevice ? 6.5 : 7.5;
+    // Unified ultra-dense gapless trail parameters for 1:1 parity on both PC and Mobile
+    const maxDots = 120;
+    const stepDistance = 2.8;
+    const decayRate = 0.038;
+    const dotRadius = 7.5;
 
     let animId: number | null = null;
     let dots: TrailDot[] = [];
@@ -40,7 +34,6 @@ export const CursorTrail: React.FC = () => {
     let lastY = -100;
     let isPointerActive = false;
     let idleTimer: any = null;
-    let lastMoveTime = 0;
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
@@ -67,14 +60,8 @@ export const CursorTrail: React.FC = () => {
       }
     };
 
-    // Instant zero-delay pointer tracking with adaptive interpolation
+    // Instant zero-delay pointer tracking with ultra-dense sub-pixel interpolation
     const updatePointer = (x: number, y: number) => {
-      const now = performance.now();
-      // Throttle rapid touchmove events to 16ms (60fps) to eliminate scroll lag
-      if (isTouchDevice && now - lastMoveTime < 14) {
-        return;
-      }
-      lastMoveTime = now;
       isPointerActive = true;
 
       if (lastX < 0) {
@@ -87,7 +74,7 @@ export const CursorTrail: React.FC = () => {
       const dist = Math.hypot(dx, dy);
 
       if (dist >= stepDistance) {
-        const steps = Math.min(Math.floor(dist / stepDistance), isTouchDevice ? 3 : 25);
+        const steps = Math.min(Math.floor(dist / stepDistance), 35);
         for (let i = 1; i <= steps; i++) {
           const px = lastX + dx * (i / steps);
           const py = lastY + dy * (i / steps);
@@ -105,7 +92,7 @@ export const CursorTrail: React.FC = () => {
         isPointerActive = false;
         lastX = -100;
         lastY = -100;
-      }, 400);
+      }, 500);
 
       // Start render loop immediately if paused
       if (!animId) {
