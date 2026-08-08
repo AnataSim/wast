@@ -29,7 +29,6 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
   const cardRef = useRef<HTMLDivElement>(null);
 
   const nickname = user.displayName || user.email?.split('@')[0] || 'User';
-  const email = user.email || 'No email';
   const defaultBanner = 'linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #3b82f6 100%)';
 
   useEffect(() => {
@@ -169,19 +168,6 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
           >
             {nickname}
           </h3>
-          <p 
-            style={{ 
-              fontSize: '0.78rem', 
-              color: 'var(--text-muted)',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              wordBreak: 'break-all',
-            }}
-            title={email}
-          >
-            {email}
-          </p>
         </div>
 
         {/* Total List Stats Box */}

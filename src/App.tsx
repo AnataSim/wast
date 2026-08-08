@@ -21,6 +21,14 @@ import { FriendProfileModal } from './components/FriendProfileModal';
 import { InspectWatchlistModal } from './components/InspectWatchlistModal';
 import { InspectWatchlistPage } from './components/InspectWatchlistPage';
 import { subscribeToIncomingRequests, type FriendRequest, type FriendUser } from './services/friendService';
+import { IntroSplash } from './components/IntroSplash';
+import { ViewSwitcher, type ViewMode } from './components/ViewSwitcher';
+import { GridShowcase } from './components/GridShowcase';
+import { KanbanBoard } from './components/KanbanBoard';
+import { AnalyticsRadar } from './components/AnalyticsRadar';
+import { AnimeRandomizerModal } from './components/AnimeRandomizerModal';
+
+
 
 
 export class ErrorBoundary extends React.Component<
@@ -68,8 +76,10 @@ export class ErrorBoundary extends React.Component<
 
 export const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
+  const [showIntro, setShowIntro] = useState<boolean>(() => !sessionStorage.getItem('wast_intro_seen'));
   
   const [items, setItems] = useState<WatchlistItem[]>([]);
+
 
   // Strictly isolate items per user UID to prevent cross-account item leaks
   useEffect(() => {
@@ -130,6 +140,10 @@ export const AppContent: React.FC = () => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<WatchlistItem | null>(null);
   const [activeBgPickerId, setActiveBgPickerId] = useState<string | null>(null);
+
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [isRandomizerOpen, setIsRandomizerOpen] = useState(false);
+
 
   const handleOpenAuthModal = (mode: 'login' | 'register' = 'login') => {
     setAuthModalMode(mode);
@@ -869,6 +883,14 @@ export const AppContent: React.FC = () => {
   if (!user) {
     return (
       <>
+        {showIntro && (
+          <IntroSplash
+            onComplete={() => {
+              sessionStorage.setItem('wast_intro_seen', 'true');
+              setShowIntro(false);
+            }}
+          />
+        )}
         <CursorTrail />
         <WelcomeHero onOpenAuthModal={(mode) => handleOpenAuthModal(mode || 'login')} />
         <AuthModal
@@ -884,6 +906,14 @@ export const AppContent: React.FC = () => {
   if (selectedFriendForInspect) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+        {showIntro && (
+          <IntroSplash
+            onComplete={() => {
+              sessionStorage.setItem('wast_intro_seen', 'true');
+              setShowIntro(false);
+            }}
+          />
+        )}
         <CursorTrail />
         <AnimatedBackground />
         <div style={{ position: 'relative', zIndex: 1 }}>
@@ -898,6 +928,14 @@ export const AppContent: React.FC = () => {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+      {showIntro && (
+        <IntroSplash
+          onComplete={() => {
+            sessionStorage.setItem('wast_intro_seen', 'true');
+            setShowIntro(false);
+          }}
+        />
+      )}
       <CursorTrail />
       <AnimatedBackground />
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -910,6 +948,18 @@ export const AppContent: React.FC = () => {
           }}
           onOpenAuthModal={() => setIsAuthModalOpen(true)}
           onOpenSettings={() => setIsSettingsModalOpen(true)}
+          onReplayIntro={() => setShowIntro(true)}
+          onQuickAddToList={(quickItem) => {
+            handleSaveItem({
+              title: quickItem.title,
+              posterUrl: quickItem.posterUrl,
+              type: quickItem.type,
+              genres: [quickItem.genre],
+              status: 'plan_to_watch',
+              progress: { currentEpisode: 0, totalEpisodes: 12 },
+            });
+          }}
+          existingTitles={items.map((i) => i.title)}
           totalCount={items.length}
           stats={profileStats}
           saveStatus={saveStatus}
@@ -946,74 +996,123 @@ export const AppContent: React.FC = () => {
                   background: 'transparent'
                 }}
               >
-                {filteredItems.length > 0 ? (
-                  <>
-                    {renderPagination('top')}
-                    <div className="cards-list" style={{ background: 'transparent' }}>
-                      {paginatedItems.map((item, index) => {
-                        const globalIndex = (itemsPerPage === 'all' || !isPaginationActive)
-                          ? index
-                          : (currentPage - 1) * (itemsPerPage as number) + index;
-                        return (
-                          <WatchCard
-                            key={item.id}
-                            item={item}
-                            index={globalIndex}
-                            activeBgPickerId={activeBgPickerId}
-                            onToggleBgPicker={(id) => setActiveBgPickerId((prev) => (prev === id ? null : id))}
-                            onCloseBgPicker={() => setActiveBgPickerId(null)}
-                            onUpdateStatus={handleUpdateStatus}
-                            onIncrementEpisode={handleIncrementEpisode}
-                            onDecrementEpisode={handleDecrementEpisode}
-                            onToggleFavorite={handleToggleFavorite}
-                            onRateItem={handleRateItem}
-                            onEditItem={(itemToEdit) => {
-                              setEditingItem(itemToEdit);
-                              setIsMediaModalOpen(true);
-                            }}
-                            onDeleteItem={handleDeleteItem}
-                            onUpdateTimestamp={handleUpdateTimestamp}
-                            onUpdateBannerPosition={handleUpdateBannerPosition}
-                            totalItems={filteredItems.length}
-                            onMoveUp={handleMoveUp}
-                            onMoveDown={handleMoveDown}
-                          />
-                        );
-                      })}
+                {/* 4-Mode View Switcher & Randomizer Bar */}
+                <ViewSwitcher
+                  currentMode={viewMode}
+                  onModeChange={setViewMode}
+                  onOpenRandomizer={() => setIsRandomizerOpen(true)}
+                  planToWatchCount={stats.planToWatchCount}
+                />
+
+                {/* View Mode 1: Grid 3D Showcase */}
+                {viewMode === 'grid' && (
+                  <GridShowcase
+                    items={filteredItems}
+                    onIncrementEpisode={handleIncrementEpisode}
+                    onDecrementEpisode={handleDecrementEpisode}
+                    onToggleFavorite={handleToggleFavorite}
+                    onDeleteItem={handleDeleteItem}
+                    onEditItem={(itemToEdit) => {
+                      setEditingItem(itemToEdit);
+                      setIsMediaModalOpen(true);
+                    }}
+                    onUpdateStatus={handleUpdateStatus}
+                  />
+                )}
+
+                {/* View Mode 2: Kanban Pipeline Board */}
+                {viewMode === 'kanban' && (
+                  <KanbanBoard
+                    items={filteredItems}
+                    onIncrementEpisode={handleIncrementEpisode}
+                    onDecrementEpisode={handleDecrementEpisode}
+                    onToggleFavorite={handleToggleFavorite}
+                    onDeleteItem={handleDeleteItem}
+                    onEditItem={(itemToEdit) => {
+                      setEditingItem(itemToEdit);
+                      setIsMediaModalOpen(true);
+                    }}
+                    onUpdateStatus={handleUpdateStatus}
+                  />
+                )}
+
+                {/* View Mode 3: RPG Stats & Analytics Radar */}
+                {viewMode === 'analytics' && (
+                  <AnalyticsRadar items={items} stats={stats} />
+                )}
+
+                {/* View Mode 4: Leaderboard List Row View */}
+                {viewMode === 'list' && (
+                  filteredItems.length > 0 ? (
+                    <>
+                      {renderPagination('top')}
+                      <div className="cards-list" style={{ background: 'transparent' }}>
+                        {paginatedItems.map((item, index) => {
+                          const globalIndex = (itemsPerPage === 'all' || !isPaginationActive)
+                            ? index
+                            : (currentPage - 1) * (itemsPerPage as number) + index;
+                          return (
+                            <WatchCard
+                              key={item.id}
+                              item={item}
+                              index={globalIndex}
+                              activeBgPickerId={activeBgPickerId}
+                              onToggleBgPicker={(id) => setActiveBgPickerId((prev) => (prev === id ? null : id))}
+                              onCloseBgPicker={() => setActiveBgPickerId(null)}
+                              onUpdateStatus={handleUpdateStatus}
+                              onIncrementEpisode={handleIncrementEpisode}
+                              onDecrementEpisode={handleDecrementEpisode}
+                              onToggleFavorite={handleToggleFavorite}
+                              onRateItem={handleRateItem}
+                              onEditItem={(itemToEdit) => {
+                                setEditingItem(itemToEdit);
+                                setIsMediaModalOpen(true);
+                              }}
+                              onDeleteItem={handleDeleteItem}
+                              onUpdateTimestamp={handleUpdateTimestamp}
+                              onUpdateBannerPosition={handleUpdateBannerPosition}
+                              totalItems={filteredItems.length}
+                              onMoveUp={handleMoveUp}
+                              onMoveDown={handleMoveDown}
+                            />
+                          );
+                        })}
+                      </div>
+                      {renderPagination('bottom')}
+                    </>
+                  ) : (
+                    <div style={{
+                      background: 'var(--bg-card)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '40px 20px',
+                      textAlign: 'center',
+                      color: 'var(--text-muted)',
+                      margin: '20px 0'
+                    }}>
+                      <AlertCircle size={28} color="var(--text-muted)" style={{ marginBottom: '12px' }} />
+                      <h3 style={{ fontSize: '1rem', color: '#fff', marginBottom: '4px' }}>Tidak ada judul ditemukan</h3>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginBottom: '16px' }}>
+                        Coba sesuaikan kata kunci pencarian atau filter yang digunakan.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setFilter({
+                            searchQuery: '',
+                            category: 'all',
+                            status: 'all',
+                            genre: 'all',
+                            sortBy: 'customOrder',
+                            sortOrder: 'asc',
+                            favoritesOnly: false,
+                          });
+                        }}
+                        className="pill-btn"
+                      >
+                        <RefreshCw size={14} /> Reset Filter
+                      </button>
                     </div>
-                    {renderPagination('bottom')}
-                  </>
-                ) : (
-                  <div style={{
-                    background: 'var(--bg-card)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '40px 20px',
-                    textAlign: 'center',
-                    margin: '20px 0'
-                  }}>
-                    <AlertCircle size={28} color="var(--text-muted)" style={{ marginBottom: '12px' }} />
-                    <h3 style={{ fontSize: '1rem', color: '#fff', marginBottom: '4px' }}>Tidak ada judul ditemukan</h3>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginBottom: '16px' }}>
-                      Coba sesuaikan kata kunci pencarian atau filter yang digunakan.
-                    </p>
-                    <button
-                      onClick={() => {
-                        setFilter({
-                          searchQuery: '',
-                          category: 'all',
-                          status: 'all',
-                          genre: 'all',
-                          sortBy: 'customOrder',
-                          sortOrder: 'asc',
-                          favoritesOnly: false,
-                        });
-                      }}
-                      className="pill-btn"
-                    >
-                      <RefreshCw size={14} /> Reset Filter
-                    </button>
-                  </div>
+                  )
                 )}
               </main>
             </div>
@@ -1085,6 +1184,13 @@ export const AppContent: React.FC = () => {
         friend={selectedFriendForInspect}
         isOpen={!!selectedFriendForInspect}
         onClose={() => setSelectedFriendForInspect(null)}
+      />
+
+      <AnimeRandomizerModal
+        isOpen={isRandomizerOpen}
+        onClose={() => setIsRandomizerOpen(false)}
+        items={items}
+        onUpdateStatus={handleUpdateStatus}
       />
     </div>
   );

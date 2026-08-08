@@ -1,4 +1,5 @@
 import type { MediaType } from '../types/watchlist';
+import { apiFetch, TTL } from '../utils/apiCache';
 
 export interface MalSearchResult {
   malId: number | string;
@@ -24,10 +25,8 @@ export async function searchMangaDex(query: string): Promise<MalSearchResult[]> 
 
   try {
     const url = `https://api.mangadex.org/manga?title=${encodeURIComponent(query.trim())}&limit=6&includes[]=cover_art`;
-    const res = await fetch(url);
-    if (!res.ok) return [];
-
-    const json = await res.json();
+    const json = await apiFetch(url, TTL.FIFTEEN_MIN).catch(() => null);
+    if (!json) return [];
     const dataList = json.data || [];
 
     // Fetch aggregates in parallel to get accurate latest chapter counts
@@ -72,9 +71,8 @@ export async function searchMangaDex(query: string): Promise<MalSearchResult[]> 
 
         if (!totalCh || totalCh <= 1) {
           try {
-            const aggRes = await fetch(`https://api.mangadex.org/manga/${item.id}/aggregate`);
-            if (aggRes.ok) {
-              const aggJson = await aggRes.json();
+            const aggJson = await apiFetch(`https://api.mangadex.org/manga/${item.id}/aggregate`, TTL.ONE_WEEK).catch(() => null);
+            if (aggJson) {
               const volumes = aggJson.volumes || {};
               let maxCh = 0;
               Object.values(volumes).forEach((vol: any) => {
@@ -152,14 +150,13 @@ export async function searchMyAnimeList(
         }
       `;
 
-      const res = await fetch('https://graphql.anilist.co', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ query: aniListQuery, variables: { q: query.trim() } })
-      });
+      const json = await apiFetch(
+        'https://graphql.anilist.co',
+        TTL.FIFTEEN_MIN,
+        { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ query: aniListQuery, variables: { q: query.trim() } }) }
+      ).catch(() => null);
 
-      if (res.ok) {
-        const json = await res.json();
+      if (json) {
         const aniListItems = json.data?.Page?.media || [];
 
         const aniListMapped: MalSearchResult[] = aniListItems.map((item: any) => {
@@ -227,14 +224,13 @@ export async function searchMyAnimeList(
       }
     `;
 
-    const res = await fetch('https://graphql.anilist.co', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ query: aniListQuery, variables: { q: query.trim() } })
-    });
+    const json = await apiFetch(
+      'https://graphql.anilist.co',
+      TTL.FIFTEEN_MIN,
+      { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ query: aniListQuery, variables: { q: query.trim() } }) }
+    ).catch(() => null);
 
-    if (res.ok) {
-      const json = await res.json();
+    if (json) {
       const mediaList = json.data?.Page?.media || [];
 
       if (mediaList.length > 0) {
@@ -276,9 +272,8 @@ export async function searchMyAnimeList(
   // Secondary Fallback Provider: Jikan REST API v4 (MyAnimeList)
   try {
     const endpoint = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=6`;
-    const res = await fetch(endpoint);
-    if (res.ok) {
-      const json = await res.json();
+    const json = await apiFetch(endpoint, TTL.FIFTEEN_MIN).catch(() => null);
+    if (json) {
       const dataList = json.data || [];
 
       return dataList.map((item: any) => {

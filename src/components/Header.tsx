@@ -15,6 +15,8 @@ import {
 import type { FilterOptions, MediaType, WatchStatus } from '../types/watchlist';
 import { useAuth } from '../context/AuthContext';
 import { ProfileCard } from './ProfileCard';
+import { UserGreetingHeader } from './UserGreetingHeader';
+import { DiscoveryMarqueeBanner } from './DiscoveryMarqueeBanner';
 
 interface HeaderProps {
   filter: FilterOptions;
@@ -22,6 +24,9 @@ interface HeaderProps {
   onOpenAddModal: () => void;
   onOpenAuthModal: () => void;
   onOpenSettings: () => void;
+  onReplayIntro?: () => void;
+  onQuickAddToList?: (item: { title: string; posterUrl: string; type: 'anime' | 'manga'; genre: string }) => void;
+  existingTitles?: string[];
   totalCount: number;
   stats: {
     animeCount: number;
@@ -40,6 +45,9 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAddModal,
   onOpenAuthModal,
   onOpenSettings,
+  onReplayIntro,
+  onQuickAddToList,
+  existingTitles = [],
   totalCount,
   stats,
   saveStatus = 'idle',
@@ -98,6 +106,29 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right Controls: User Avatar / Login & Add Button */}
         <div className="navbar-right-controls" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {onReplayIntro && (
+            <button
+              onClick={onReplayIntro}
+              title="Putar Ulang Animasi Pembukaan Intro"
+              style={{
+                background: 'rgba(56, 189, 248, 0.12)',
+                border: '1px solid rgba(56, 189, 248, 0.3)',
+                color: '#38bdf8',
+                borderRadius: 'var(--radius-pill)',
+                padding: '5px 12px',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <Clapperboard size={14} />
+              <span className="btn-label-mobile">Intro</span>
+            </button>
+          )}
           {user && (
             <button
               onClick={onToggleFriendsPanel}
@@ -207,51 +238,19 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Main Container Section */}
       <div className="main-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px 16px' }}>
         
-        {/* Row 1: Section Title Left & Segmented Category Tabs Right */}
-        <div className="mobile-title-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
-          <h1 className="section-title">
-            Koleksi Anime &amp; Manga
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500, marginLeft: '8px' }}>
-              ({totalCount} judul)
-            </span>
-          </h1>
+        {/* NEW FEATURE 1: Personal User Greeting Banner Header */}
+        <UserGreetingHeader user={user} totalItems={totalCount} stats={stats} />
 
-          {/* Segmented Category Buttons */}
-          <div className="mobile-category-tabs" style={{ display: 'flex', background: 'var(--bg-card)', padding: '4px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', gap: '4px' }}>
-            {categoryTabs.map((tab) => {
-              const isActive = filter.category === tab.value;
-              return (
-                <button
-                  key={tab.value}
-                  onClick={() => onFilterChange({ category: tab.value })}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '6px 14px',
-                    borderRadius: 'var(--radius-sm)',
-                    fontSize: '0.82rem',
-                    fontWeight: 600,
-                    border: 'none',
-                    background: isActive ? 'var(--accent-blue)' : 'transparent',
-                    color: isActive ? '#ffffff' : 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  {tab.icon}
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        {/* NEW FEATURE 2: Infinite Moving Discovery Marquee Banner (Right to Left) */}
+        {onQuickAddToList && (
+          <DiscoveryMarqueeBanner onQuickAdd={onQuickAddToList} existingTitles={existingTitles} />
+        )}
 
-        {/* Row 2 & 3: Clean Filter Panel Box */}
+        {/* Integrated Sleek Control Toolbar */}
         <div 
           className="filter-panel-box"
           style={{ 
-            background: 'var(--bg-card)', 
+            background: 'rgba(15, 23, 42, 0.85)', 
             border: '1px solid var(--border-subtle)', 
             borderRadius: 'var(--radius-md)', 
             padding: '16px 20px', 
@@ -259,14 +258,45 @@ export const Header: React.FC<HeaderProps> = ({
             display: 'flex',
             flexDirection: 'column',
             gap: '14px',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)'
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+            backdropFilter: 'blur(16px)',
           }}
         >
-          {/* Sub-row 1: Search bar (Left) & Sorting Buttons (Right) */}
+          {/* Sub-row 1: Category Selector (Left) & Search Bar & Sorts */}
           <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
             
+            {/* Segmented Category Buttons */}
+            <div className="mobile-category-tabs" style={{ display: 'flex', background: 'var(--bg-card)', padding: '4px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', gap: '4px' }}>
+              {categoryTabs.map((tab) => {
+                const isActive = filter.category === tab.value;
+                return (
+                  <button
+                    key={tab.value}
+                    onClick={() => onFilterChange({ category: tab.value })}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '6px 14px',
+                      borderRadius: 'var(--radius-sm)',
+                      fontSize: '0.82rem',
+                      fontWeight: 600,
+                      border: 'none',
+                      background: isActive ? 'var(--accent-blue)' : 'transparent',
+                      color: isActive ? '#ffffff' : 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    {tab.icon}
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
             {/* Search Input Box */}
-            <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
+            <div style={{ position: 'relative', flex: 1, minWidth: '220px' }}>
               <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input
                 type="text"
@@ -345,3 +375,4 @@ export const Header: React.FC<HeaderProps> = ({
     </>
   );
 };
+

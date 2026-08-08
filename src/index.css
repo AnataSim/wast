@@ -713,4 +713,195 @@ body {
   background: rgba(59, 130, 246, 0.25) !important;
 }
 
+/* ==========================================================================
+   INTRO SPLASH ANIMATIONS & STYLES
+   ========================================================================== */
+
+.intro-splash-overlay {
+  animation: introFadeIn 0.5s ease-out forwards;
+}
+
+.intro-splash-fadeout {
+  animation: introFadeOut 0.6s ease-in forwards !important;
+}
+
+@keyframes introFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes introFadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.96);
+    filter: blur(10px);
+  }
+}
+
+/* Logo Ring Orbit */
+.intro-ring-orbit {
+  position: absolute;
+  inset: -12px;
+  border-radius: 34px;
+  border: 2px dashed rgba(56, 189, 248, 0.5);
+  animation: spinOrbitRing 12s linear infinite;
+}
+
+@keyframes spinOrbitRing {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.intro-logo-icon {
+  animation: logoPulse 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes logoPulse {
+  0% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
+  }
+}
+
+/* Cyber Title Glitch/Shimmer Animation */
+.intro-glitch-title {
+  position: relative;
+  animation: titleShimmer 4s ease-in-out infinite alternate;
+}
+
+@keyframes titleShimmer {
+  0% {
+    filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.6));
+  }
+  100% {
+    filter: drop-shadow(0 0 35px rgba(56, 189, 248, 0.8));
+  }
+}
+
+.intro-spin-sparkle {
+  animation: spinSparkle 2s linear infinite;
+}
+
+@keyframes spinSparkle {
+  0% {
+    transform: rotate(0deg) scale(0.9);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(360deg) scale(0.9);
+  }
+}
+
+.intro-pulse-icon {
+  animation: iconPulseFast 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes iconPulseFast {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+/* Enter Button Hover FX */
+.intro-enter-btn.intro-btn-ready:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 50px rgba(59, 130, 246, 0.7), 0 0 20px rgba(168, 85, 247, 0.5) !important;
+}
+
+.intro-enter-btn:active {
+  transform: translateY(1px) scale(0.98) !important;
+}
+
+/* ==========================================================================
+   GRID 3D SHOWCASE & KANBAN STYLES
+   ========================================================================== */
+
+.grid-3d-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(59, 130, 246, 0.45) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(59, 130, 246, 0.25) !important;
+}
+
+.grid-3d-card:hover img {
+  transform: scale(1.08);
+}
+
+.kanban-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(56, 189, 248, 0.35) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4) !important;
+}
+
+.kanban-board-container::-webkit-scrollbar {
+  height: 8px;
+}
+.kanban-board-container::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+.kanban-board-container::-webkit-scrollbar-thumb:hover {
+  background: #3b82f6;
+}
+
+/* ==========================================================================
+   DISCOVERY MARQUEE SCROLL (RIGHT TO LEFT INFINITE SCROLL)
+   ========================================================================== */
+
+.discovery-marquee-track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  animation: marqueeScrollRightToLeft 35s linear infinite;
+  will-change: transform;
+}
+
+.discovery-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marqueeScrollRightToLeft {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
+}
+
+.discovery-marquee-card:hover {
+  transform: translateY(-6px) scale(1.04);
+  border-color: #38bdf8 !important;
+  box-shadow: 0 12px 30px rgba(56, 189, 248, 0.45) !important;
+}
+
+
+
+
 
