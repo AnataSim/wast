@@ -10,7 +10,8 @@ import {
   Users,
   SlidersHorizontal,
   ArrowUpDown,
-  Check
+  Check,
+  Film
 } from 'lucide-react';
 import type { FilterOptions, MediaType, WatchStatus } from '../types/watchlist';
 import { useAuth } from '../context/AuthContext';
@@ -24,7 +25,6 @@ interface HeaderProps {
   onOpenAddModal: () => void;
   onOpenAuthModal: () => void;
   onOpenSettings: () => void;
-  onReplayIntro?: () => void;
   onQuickAddToList?: (item: {
     title: string;
     originalTitle?: string;
@@ -52,7 +52,6 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAddModal,
   onOpenAuthModal,
   onOpenSettings,
-  onReplayIntro,
   onQuickAddToList,
   existingTitles = [],
   totalCount,
@@ -84,7 +83,21 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Navbar Atas */}
       <nav className="navbar" style={{ marginBottom: '24px', position: 'sticky', top: 0, zIndex: 500 }}>
         <a href="#" className="brand-logo">
-          <span className="brand-dot" />
+          <div
+            style={{
+              width: '24px',
+              height: '24px',
+              borderRadius: '7px',
+              background: 'linear-gradient(135deg, #3b82f6 0%, #a855f7 50%, #06b6d4 100%)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 10px rgba(59, 130, 246, 0.4)',
+              flexShrink: 0,
+            }}
+          >
+            <Film size={14} color="#ffffff" />
+          </div>
           Wast
           <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-cyan)', background: 'rgba(56, 189, 248, 0.12)', padding: '2px 8px', borderRadius: 'var(--radius-full)' }}>
             TSX
@@ -113,29 +126,6 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right Controls: User Avatar / Login & Add Button */}
         <div className="navbar-right-controls" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {onReplayIntro && (
-            <button
-              onClick={onReplayIntro}
-              title="Putar Ulang Animasi Pembukaan Intro"
-              style={{
-                background: 'rgba(56, 189, 248, 0.12)',
-                border: '1px solid rgba(56, 189, 248, 0.3)',
-                color: '#38bdf8',
-                borderRadius: 'var(--radius-pill)',
-                padding: '5px 12px',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              <Clapperboard size={14} />
-              <span className="btn-label-mobile">Intro</span>
-            </button>
-          )}
           {user && (
             <button
               onClick={onToggleFriendsPanel}

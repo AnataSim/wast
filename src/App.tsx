@@ -256,11 +256,24 @@ export const AppContent: React.FC = () => {
     let targetItem: WatchlistItem;
 
     if (itemData.id) {
+      const existing = items.find(i => i.id === itemData.id);
       targetItem = {
-        ...items.find(i => i.id === itemData.id),
+        ...existing,
         ...itemData,
         updatedAt: now,
       } as WatchlistItem;
+
+      // If optional string fields are explicitly cleared in itemData, remove them from targetItem
+      if ('linkUrl' in itemData && (!itemData.linkUrl || !itemData.linkUrl.trim())) {
+        delete targetItem.linkUrl;
+      }
+      if ('originalTitle' in itemData && (!itemData.originalTitle || !itemData.originalTitle.trim())) {
+        delete targetItem.originalTitle;
+      }
+      if ('notes' in itemData && (!itemData.notes || !itemData.notes.trim())) {
+        delete targetItem.notes;
+      }
+
       setItems((prev) => prev.map((item) => (item.id === targetItem.id ? targetItem : item)));
     } else {
       targetItem = {
@@ -953,7 +966,6 @@ export const AppContent: React.FC = () => {
           }}
           onOpenAuthModal={() => setIsAuthModalOpen(true)}
           onOpenSettings={() => setIsSettingsModalOpen(true)}
-          onReplayIntro={() => setShowIntro(true)}
           onQuickAddToList={(quickItem) => {
             handleSaveItem({
               title: quickItem.title,

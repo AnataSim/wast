@@ -67,6 +67,9 @@ export const saveWatchlistItemToFirestore = async (userId: string, item: Watchli
 
   const rawPayload = {
     ...item,
+    linkUrl: item.linkUrl && item.linkUrl.trim() ? item.linkUrl.trim() : null,
+    originalTitle: item.originalTitle && item.originalTitle.trim() ? item.originalTitle.trim() : null,
+    notes: item.notes && item.notes.trim() ? item.notes.trim() : null,
     _securityHeaders: securityHeaders,
     _encryptedBackup: encryptedBackup,
   };

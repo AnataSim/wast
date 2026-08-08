@@ -781,7 +781,7 @@ body {
   inset: -12px;
   border-radius: 34px;
   border: 2px dashed rgba(56, 189, 248, 0.5);
-  animation: spinOrbitRing 12s linear infinite;
+  animation: spinOrbitRing 1.8s linear infinite;
 }
 
 @keyframes spinOrbitRing {

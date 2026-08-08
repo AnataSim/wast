@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Film, Volume2, VolumeX, Sparkles, Zap, Play, FastForward, CheckCircle2 } from 'lucide-react';
+import { Film, Sparkles, Zap, Play, CheckCircle2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface IntroSplashProps {
@@ -10,7 +10,6 @@ interface IntroSplashProps {
 export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [progress, setProgress] = useState(0);
-  const [isAudioMuted, setIsAudioMuted] = useState(false);
   const [currentPhase, setCurrentPhase] = useState(0);
   const [isReady, setIsReady] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
@@ -25,7 +24,6 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
 
   // Helper for Web Audio API sound effects (no external mp3 files needed)
   const playSciFiSound = (type: 'blip' | 'burst' | 'click' | 'hum') => {
-    if (isAudioMuted) return;
     try {
       if (!audioCtxRef.current) {
         const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -223,6 +221,10 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
           clearInterval(interval);
           setIsReady(true);
           playSciFiSound('blip');
+          // Wait 1.8 seconds (1-2 detik) at 100% progress before automatically opening main app
+          setTimeout(() => {
+            handleEnterApp();
+          }, 1800);
           return 100;
         }
         const next = prev + 2;
@@ -264,13 +266,6 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
     }, 600);
   };
 
-  const handleSkip = () => {
-    playSciFiSound('click');
-    setIsExiting(true);
-    setTimeout(() => {
-      onComplete();
-    }, 400);
-  };
 
   return (
     <div
@@ -305,57 +300,9 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
           zIndex: 20,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.6)', background: 'rgba(15, 23, 42, 0.6)', padding: '6px 14px', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.7)', background: 'rgba(15, 23, 42, 0.6)', padding: '6px 14px', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
           <Zap size={14} color="#38bdf8" className="intro-pulse-icon" />
-          <span style={{ fontWeight: 600, letterSpacing: '0.05em' }}>WAST SYSTEM v2.5</span>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <button
-            onClick={() => {
-              setIsAudioMuted(!isAudioMuted);
-              playSciFiSound('click');
-            }}
-            style={{
-              background: 'rgba(15, 23, 42, 0.7)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              color: isAudioMuted ? '#94a3b8' : '#38bdf8',
-              borderRadius: '20px',
-              padding: '6px 14px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.8rem',
-              transition: 'all 0.2s ease',
-            }}
-            title={isAudioMuted ? 'Unmute Sound FX' : 'Mute Sound FX'}
-          >
-            {isAudioMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
-            <span>{isAudioMuted ? 'Muted' : 'Audio On'}</span>
-          </button>
-
-          <button
-            onClick={handleSkip}
-            style={{
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              color: '#ffffff',
-              borderRadius: '20px',
-              padding: '6px 16px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              backdropFilter: 'blur(10px)',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            <FastForward size={14} />
-            <span>Lewati</span>
-          </button>
+          <span style={{ fontWeight: 600, letterSpacing: '0.05em' }}>WAST SYSTEM Versi "W-002"</span>
         </div>
       </div>
 
@@ -381,7 +328,12 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
       >
         {/* Animated Glowing Logo Frame */}
         <div className="intro-logo-glow-wrapper" style={{ marginBottom: '28px', position: 'relative' }}>
-          <div className="intro-ring-orbit" />
+          <div
+            className="intro-ring-orbit"
+            style={{
+              animationDuration: progress >= 100 ? '0.7s' : '1.8s',
+            }}
+          />
           <div
             style={{
               width: '90px',
@@ -474,9 +426,8 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
           />
         </div>
 
-        {/* Enter Action Button */}
-        <button
-          onClick={handleEnterApp}
+        {/* Enter Action Indicator Bar (Non-clickable, automatic on 100%) */}
+        <div
           className={`intro-enter-btn ${isReady ? 'intro-btn-ready' : ''}`}
           style={{
             width: '100%',
@@ -491,7 +442,8 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
               : 'rgba(255, 255, 255, 0.08)',
             border: isReady ? '1px solid rgba(147, 197, 253, 0.5)' : '1px solid rgba(255, 255, 255, 0.15)',
             boxShadow: isReady ? '0 0 35px rgba(59, 130, 246, 0.5)' : 'none',
-            cursor: 'pointer',
+            cursor: 'default',
+            pointerEvents: 'none',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -502,11 +454,11 @@ export const IntroSplash: React.FC<IntroSplashProps> = ({ onComplete }) => {
           }}
         >
           <Play size={20} fill={isReady ? '#ffffff' : 'none'} color="#ffffff" />
-          <span>{isReady ? 'MASUK KE WAST' : 'MEMUAT SISTEM...'}</span>
-        </button>
+          <span>{isReady ? 'SISTEM SIAP - MEMBUKA WAST...' : 'MEMUAT SISTEM...'}</span>
+        </div>
 
-        <p style={{ marginTop: '16px', fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.4)' }}>
-          Klik tombol di atas untuk membuka aplikasi secara penuh
+        <p style={{ marginTop: '16px', fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)', fontWeight: 500 }}>
+          ⚡ Progres otomatis membuka aplikasi setelah 100%
         </p>
       </div>
     </div>

@@ -7,41 +7,45 @@ interface ChangelogNotificationProps {
 
 export const ChangelogNotification: React.FC<ChangelogNotificationProps> = ({ onOpenAddModal }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
 
-  const commitTitle = "feat(marquee): smart anime & manga cross-detection, daily date seed 1-50, accurate chapter count & japanese title support";
+  const commitTitle = "feat(release): auto-enter splash W-002, dynamic 1.8s->0.7s orbit ring, delete link fix & rules update";
   const releaseDate = "8 Agustus 2026";
 
   const changelogItems = [
     {
-      title: "Deteksi Otomatis Anime & Manga",
-      description: "Tombol `+ Anime` & `+ Manga` di kartu rekomendasi otomatis menyesuaikan berdasarkan ketersediaan versi media di AniList.",
-      category: "Feature",
-    },
-    {
-      title: "Akurasi Total Chapter & Episode",
-      description: "Menambahkan dari banner rekomendasi kini menyimpan jumlah total episode/chapter asli dari API (tidak lagi terbatas 12).",
+      title: "Hapus Link Nonton & Baca",
+      description: "Menghapus URL link pada form edit kini menghapus secara permanen dari Firestore database & tampilan kartu.",
       category: "Fix",
     },
     {
-      title: "Judul Bahasa Jepang (Kanji / Kana)",
-      description: "Otomatis menyimpan & menampilkan judul asli Jepang di bawah judul utama pada mode Grid 3D & List Row.",
-      category: "Feature",
+      title: "Transisi Otomatis Splash Versi W-002",
+      description: "Layar pembuka otomatis masuk setelah 100% dengan kecepatan orbit ring dinamis (1.8s saat loading, 0.7s saat selesai).",
+      category: "New",
     },
     {
-      title: "Genre Badge Vertikal & Prioritas Filter",
-      description: "Hingga 3 genre tampil bertumpuk secara vertikal di pojok kiri atas kartu, dengan genre terpilih selalu berada di paling atas.",
+      title: "Pembaruan Header & Versi W-002",
+      description: "Menampilkan teks badge Versi 'W-002', menyelaraskan logo header dengan tampilan intro, serta membersihkan tombol intro navbar.",
       category: "UI/UX",
     },
     {
-      title: "Rekomendasi Harian 1-50 (Daily Seed)",
-      description: "Urutan rekomendasi stabil sepanjang hari, ganti otomatis tiap hari, dan dapat di-refresh manual tanpa duplikasi rekomendasi lama.",
+      title: "Perbaikan Tombol Tutup (X) Changelog",
+      description: "Menekan tombol X di pojok kanan atas notifikasi kini langsung menutup popup daftar update.",
+      category: "Fix",
+    },
+    {
+      title: "Deteksi Otomatis Anime & Manga",
+      description: "Tombol `+ Anime` & `+ Manga` di kartu rekomendasi otomatis menyesuaikan berdasarkan ketersediaan versi media di AniList.",
+      category: "New",
+    },
+    {
+      title: "Judul Bahasa Jepang & Total Chapter",
+      description: "Menyimpan & menampilkan judul asli Jepang serta total episode/chapter asli dari API AniList.",
+      category: "New",
+    },
+    {
+      title: "Genre Badge Vertikal & Rekomendasi Harian",
+      description: "Hingga 3 genre tampil bertumpuk vertikal dengan genre terpilih di paling atas. Rekomendasi stabil 1-50 tiap hari.",
       category: "Algorithm",
-    },
-    {
-      title: "Penanda Halaman Manga & Timer Nonton",
-      description: "Tampilan Grid 3D kini mendukung penanda `Hal. X` untuk Manga beserta link langsung ke platform baca/nonton.",
-      category: "UI/UX",
     },
   ];
 
@@ -110,7 +114,7 @@ export const ChangelogNotification: React.FC<ChangelogNotificationProps> = ({ on
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setIsDismissed(true);
+                setIsOpen(false);
               }}
               style={{
                 background: 'none',
@@ -129,31 +133,36 @@ export const ChangelogNotification: React.FC<ChangelogNotificationProps> = ({ on
           {/* Commit Name Banner */}
           <div
             style={{
-              background: 'rgba(15, 23, 42, 0.8)',
+              background: 'rgba(56, 189, 248, 0.08)',
               border: '1px solid rgba(56, 189, 248, 0.25)',
               borderRadius: '10px',
-              padding: '8px 10px',
-              fontSize: '0.72rem',
+              padding: '8px 12px',
+              fontSize: '0.73rem',
+              color: '#38bdf8',
+              fontFamily: 'monospace',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              color: '#93c5fd',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
             }}
+            title={commitTitle}
           >
-            <GitCommit size={14} color="#38bdf8" style={{ flexShrink: 0 }} />
-            <div style={{ flex: 1, minWidth: 0, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={commitTitle}>
-              <span style={{ color: '#38bdf8', fontWeight: 700 }}>Commit:</span> {commitTitle}
-            </div>
+            <GitCommit size={14} style={{ flexShrink: 0 }} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              Commit: {commitTitle}
+            </span>
           </div>
 
-          {/* Changelog Items List */}
+          {/* Scrollable Changelog Items List */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '10px',
+              gap: '8px',
               overflowY: 'auto',
-              maxHeight: '280px',
+              maxHeight: '260px',
               paddingRight: '4px',
             }}
           >
@@ -179,18 +188,23 @@ export const ChangelogNotification: React.FC<ChangelogNotificationProps> = ({ on
                         padding: '1px 5px',
                         borderRadius: '4px',
                         background:
-                          item.category === 'Feature'
+                          item.category === 'New'
+                            ? 'rgba(56, 189, 248, 0.25)'
+                            : item.category === 'Feature'
                             ? 'rgba(56, 189, 248, 0.2)'
                             : item.category === 'Fix'
                             ? 'rgba(74, 222, 128, 0.2)'
                             : 'rgba(192, 132, 252, 0.2)',
                         color:
-                          item.category === 'Feature'
+                          item.category === 'New'
+                            ? '#38bdf8'
+                            : item.category === 'Feature'
                             ? '#38bdf8'
                             : item.category === 'Fix'
                             ? '#4ade80'
                             : '#c084fc',
                         fontWeight: 700,
+                        border: item.category === 'New' ? '1px solid rgba(56, 189, 248, 0.4)' : 'none',
                       }}
                     >
                       {item.category}
@@ -247,9 +261,8 @@ export const ChangelogNotification: React.FC<ChangelogNotificationProps> = ({ on
         )}
 
         {/* Floating Trigger Button: Update Baru (Bottom) */}
-        {!isDismissed && (
-          <button
-            onClick={() => setIsOpen((prev) => !prev)}
+        <button
+          onClick={() => setIsOpen((prev) => !prev)}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -297,7 +310,6 @@ export const ChangelogNotification: React.FC<ChangelogNotificationProps> = ({ on
 
         {isOpen ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
       </button>
-      )}
       </div>
 
       <style>{`
