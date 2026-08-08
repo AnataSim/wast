@@ -10,7 +10,6 @@ export const ChangelogNotification: React.FC<ChangelogNotificationProps> = ({ on
   const [isDismissed, setIsDismissed] = useState(false);
 
   const commitTitle = "feat(marquee): smart anime & manga cross-detection, daily date seed 1-50, accurate chapter count & japanese title support";
-  const commitHash = "c9a2e41";
   const releaseDate = "8 Agustus 2026";
 
   const changelogItems = [
@@ -211,7 +210,7 @@ export const ChangelogNotification: React.FC<ChangelogNotificationProps> = ({ on
               paddingTop: '8px',
               borderTop: '1px solid rgba(255, 255, 255, 0.08)',
               display: 'flex',
-              justify: 'space-between',
+              justifyContent: 'space-between',
               alignItems: 'center',
               fontSize: '0.66rem',
               color: '#64748b',
@@ -235,29 +234,15 @@ export const ChangelogNotification: React.FC<ChangelogNotificationProps> = ({ on
 
       {/* Floating Action Group Container */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-        {/* Floating Add Title Button (Top) */}
+        {/* Floating Add Title Button (HP/Mobile Only) */}
         {onOpenAddModal && (
           <button
             onClick={() => onOpenAddModal()}
+            className="mobile-fab-add"
             title="Tambah Anime atau Manga Baru"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '9px 16px',
-              borderRadius: '30px',
-              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-              color: '#ffffff',
-              fontWeight: 700,
-              fontSize: '0.8rem',
-              border: '1px solid rgba(147, 197, 253, 0.4)',
-              boxShadow: '0 8px 25px rgba(37, 99, 235, 0.45), 0 0 15px rgba(59, 130, 246, 0.3)',
-              cursor: 'pointer',
-              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-            }}
           >
-            <Plus size={16} strokeWidth={2.5} />
-            <span>Tambah Judul</span>
+            <Plus size={18} strokeWidth={2.5} />
+            <span className="mobile-fab-text">Tambah Judul</span>
           </button>
         )}
 

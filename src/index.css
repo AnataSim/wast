@@ -418,6 +418,10 @@ body {
   100% { transform: translateX(100%) rotate(30deg); }
 }
 
+.mobile-fab-add {
+  display: none;
+}
+
 /* ==========================================================================
    MOBILE RESPONSIVE STYLES (Tampilan HP / Mobile Responsive & PWA Friendly)
    ========================================================================== */
@@ -456,6 +460,25 @@ body {
   }
 
   .header-add-title-btn {
+    display: none !important;
+  }
+
+  .mobile-fab-add {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: #ffffff;
+    border: 1px solid rgba(147, 197, 253, 0.4);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5), 0 0 15px rgba(59, 130, 246, 0.35);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .mobile-fab-text {
     display: none !important;
   }
 
