@@ -25,7 +25,14 @@ interface HeaderProps {
   onOpenAuthModal: () => void;
   onOpenSettings: () => void;
   onReplayIntro?: () => void;
-  onQuickAddToList?: (item: { title: string; posterUrl: string; type: 'anime' | 'manga'; genre: string }) => void;
+  onQuickAddToList?: (item: {
+    title: string;
+    originalTitle?: string;
+    posterUrl: string;
+    type: 'anime' | 'manga';
+    genre: string;
+    totalEpisodes?: number;
+  }) => void;
   existingTitles?: string[];
   totalCount: number;
   stats: {

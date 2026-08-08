@@ -27,6 +27,7 @@ import { GridShowcase } from './components/GridShowcase';
 import { KanbanBoard } from './components/KanbanBoard';
 import { AnalyticsRadar } from './components/AnalyticsRadar';
 import { AnimeRandomizerModal } from './components/AnimeRandomizerModal';
+import { ChangelogNotification } from './components/ChangelogNotification';
 
 
 
@@ -938,6 +939,7 @@ export const AppContent: React.FC = () => {
       )}
       <CursorTrail />
       <AnimatedBackground />
+      <ChangelogNotification />
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Header
           filter={filter}
@@ -952,11 +954,15 @@ export const AppContent: React.FC = () => {
           onQuickAddToList={(quickItem) => {
             handleSaveItem({
               title: quickItem.title,
+              originalTitle: quickItem.originalTitle,
               posterUrl: quickItem.posterUrl,
               type: quickItem.type,
               genres: [quickItem.genre],
               status: 'plan_to_watch',
-              progress: { currentEpisode: 0, totalEpisodes: 12 },
+              progress: {
+                currentEpisode: 0,
+                totalEpisodes: quickItem.totalEpisodes || (quickItem.type === 'anime' ? 12 : 1),
+              },
             });
           }}
           existingTitles={items.map((i) => i.title)}

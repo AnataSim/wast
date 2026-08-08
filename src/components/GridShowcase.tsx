@@ -1,6 +1,6 @@
 import React from 'react';
 import type { WatchlistItem, WatchStatus } from '../types/watchlist';
-import { Star, Plus, Minus, Heart, Trash2, Edit3, Film, BookOpen, Clock } from 'lucide-react';
+import { Star, Plus, Minus, Heart, Trash2, Edit3, Film, BookOpen, Clock, BookMarked, ExternalLink } from 'lucide-react';
 
 interface GridShowcaseProps {
   items: WatchlistItem[];
@@ -287,8 +287,8 @@ export const GridShowcase: React.FC<GridShowcaseProps> = ({
                   />
                 </div>
 
-                {/* Last timestamp note indicator if set */}
-                {item.progress.lastTimeObj && (
+                {/* Anime: Timer tanda / Manga: Halaman tanda + link */}
+                {item.type === 'anime' && item.progress.lastTimeObj && (
                   <div
                     style={{
                       fontSize: '0.72rem',
@@ -296,18 +296,71 @@ export const GridShowcase: React.FC<GridShowcaseProps> = ({
                       background: 'rgba(56, 189, 248, 0.1)',
                       padding: '3px 8px',
                       borderRadius: '6px',
-                      marginBottom: '12px',
+                      marginBottom: '8px',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '4px',
                     }}
                   >
                     <Clock size={11} />
-                    <span>
+                    <span style={{ flex: 1 }}>
                       Tanda: {String(item.progress.lastTimeObj.hours).padStart(2, '0')}:
                       {String(item.progress.lastTimeObj.minutes).padStart(2, '0')}:
                       {String(item.progress.lastTimeObj.seconds).padStart(2, '0')}
                     </span>
+                    {item.linkUrl && (
+                      <a
+                        href={item.linkUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Buka link nonton"
+                        style={{
+                          display: 'inline-flex', alignItems: 'center',
+                          color: '#38bdf8', opacity: 0.8,
+                          background: 'rgba(56,189,248,0.15)',
+                          borderRadius: '4px', padding: '1px 4px',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <ExternalLink size={10} />
+                      </a>
+                    )}
+                  </div>
+                )}
+                {item.type === 'manga' && item.progress.lastPage && item.progress.lastPage > 0 && (
+                  <div
+                    style={{
+                      fontSize: '0.72rem',
+                      color: '#c084fc',
+                      background: 'rgba(192, 132, 252, 0.1)',
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      marginBottom: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      border: '1px solid rgba(192,132,252,0.2)',
+                    }}
+                  >
+                    <BookMarked size={11} />
+                    <span style={{ flex: 1 }}>Hal. {item.progress.lastPage}</span>
+                    {item.linkUrl && (
+                      <a
+                        href={item.linkUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Buka link baca"
+                        style={{
+                          display: 'inline-flex', alignItems: 'center',
+                          color: '#c084fc', opacity: 0.8,
+                          background: 'rgba(192,132,252,0.15)',
+                          borderRadius: '4px', padding: '1px 4px',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <ExternalLink size={10} />
+                      </a>
+                    )}
                   </div>
                 )}
 
