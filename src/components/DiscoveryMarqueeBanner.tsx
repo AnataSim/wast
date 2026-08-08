@@ -276,6 +276,249 @@ async function checkAvailability(item: DiscoveryItem): Promise<Partial<Discovery
   }
 }
 
+const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
+  {
+    id: 'anilist-154587',
+    anilistId: 154587,
+    title: "Frieren: Beyond Journey's End",
+    originalTitle: "葬送のフリーレン",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx154587-nGU9mZLDptxM.jpg",
+    genre: "Action",
+    genres: ["Action", "Adventure", "Fantasy"],
+    type: "anime",
+    rating: 9.3,
+    hasAnime: true,
+    hasManga: true,
+    animeEpisodes: 28,
+    mangaChapters: 130,
+  },
+  {
+    id: 'anilist-101921',
+    anilistId: 101921,
+    title: "Kaguya-sama: Love is War",
+    originalTitle: "かぐや様は告らせたい～天才たちの恋愛頭脳戦～",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101921-6g6nC1R0aV9m.jpg",
+    genre: "Romance",
+    genres: ["Romance", "Comedy", "Slice of Life"],
+    type: "anime",
+    rating: 8.7,
+    hasAnime: true,
+    hasManga: true,
+    animeEpisodes: 12,
+    mangaChapters: 281,
+  },
+  {
+    id: 'anilist-113415',
+    anilistId: 113415,
+    title: "Jujutsu Kaisen",
+    originalTitle: "呪術廻戦",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx113415-bbBWj4pGFseh.png",
+    genre: "Action",
+    genres: ["Action", "Fantasy", "Supernatural"],
+    type: "anime",
+    rating: 8.6,
+    hasAnime: true,
+    hasManga: true,
+    animeEpisodes: 24,
+    mangaChapters: 271,
+  },
+  {
+    id: 'anilist-127230',
+    anilistId: 127230,
+    title: "Chainsaw Man",
+    originalTitle: "チェンソーマン",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx127230-010n0S2e0x4K.png",
+    genre: "Action",
+    genres: ["Action", "Fantasy", "Supernatural"],
+    type: "anime",
+    rating: 8.4,
+    hasAnime: true,
+    hasManga: true,
+    animeEpisodes: 12,
+    mangaChapters: 180,
+  },
+  {
+    id: 'anilist-124080',
+    anilistId: 124080,
+    title: "Horimiya",
+    originalTitle: "ホリミヤ",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx124080-b74B3a8L9S87.jpg",
+    genre: "Romance",
+    genres: ["Romance", "Slice of Life", "Comedy"],
+    type: "anime",
+    rating: 8.2,
+    hasAnime: true,
+    hasManga: true,
+    animeEpisodes: 13,
+    mangaChapters: 125,
+  },
+  {
+    id: 'anilist-101922',
+    anilistId: 101922,
+    title: "Demon Slayer: Kimetsu no Yaiba",
+    originalTitle: "鬼滅の刃",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101922-PEn1rB9R9C6z.jpg",
+    genre: "Action",
+    genres: ["Action", "Fantasy", "Supernatural"],
+    type: "anime",
+    rating: 8.5,
+    hasAnime: true,
+    hasManga: true,
+    animeEpisodes: 26,
+    mangaChapters: 205,
+  },
+  {
+    id: 'anilist-140960',
+    anilistId: 140960,
+    title: "Spy x Family",
+    originalTitle: "SPY×FAMILY",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx140960-vNL2fB856yD7.jpg",
+    genre: "Comedy",
+    genres: ["Comedy", "Action", "Slice of Life"],
+    type: "anime",
+    rating: 8.5,
+    hasAnime: true,
+    hasManga: true,
+    animeEpisodes: 25,
+    mangaChapters: 100,
+  },
+  {
+    id: 'anilist-108465',
+    anilistId: 108465,
+    title: "Mushoku Tensei: Jobless Reincarnation",
+    originalTitle: "無職転生 ～異世界行ったら本気だす～",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx108465-bErZqZ9k5z2d.jpg",
+    genre: "Isekai",
+    genres: ["Isekai", "Fantasy", "Adventure"],
+    type: "anime",
+    rating: 8.4,
+    hasAnime: true,
+    hasManga: true,
+    animeEpisodes: 23,
+    mangaChapters: 95,
+  },
+  {
+    id: 'anilist-132405',
+    anilistId: 132405,
+    title: "My Dress-Up Darling",
+    originalTitle: "その着せ替え人形は恋をする",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx132405-sP88uC25a2qA.jpg",
+    genre: "Romance",
+    genres: ["Romance", "Slice of Life", "Comedy"],
+    type: "anime",
+    rating: 8.3,
+    hasAnime: true,
+    hasManga: true,
+    animeEpisodes: 12,
+    mangaChapters: 105,
+  },
+  {
+    id: 'anilist-130003',
+    anilistId: 130003,
+    title: "Bocchi the Rock!",
+    originalTitle: "ぼっち・ざ・ろっく！",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx130003-k2F7Jm5q1m8v.jpg",
+    genre: "Slice of Life",
+    genres: ["Slice of Life", "Comedy", "Music"],
+    type: "anime",
+    rating: 8.8,
+    hasAnime: true,
+    hasManga: true,
+    animeEpisodes: 12,
+    mangaChapters: 70,
+  },
+  {
+    id: 'anilist-126791',
+    anilistId: 126791,
+    title: "Cyberpunk: Edgerunners",
+    originalTitle: "サイバーパンク エッジランナーズ",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx126791-j5Yg22oG007P.png",
+    genre: "Sci-Fi",
+    genres: ["Sci-Fi", "Action", "Drama"],
+    type: "anime",
+    rating: 8.6,
+    hasAnime: true,
+    hasManga: false,
+    animeEpisodes: 10,
+    mangaChapters: null,
+  },
+  {
+    id: 'anilist-9253',
+    anilistId: 9253,
+    title: "Steins;Gate",
+    originalTitle: "シュタインズ・ゲート",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx9253-1K076C55PZ5P.jpg",
+    genre: "Sci-Fi",
+    genres: ["Sci-Fi", "Thriller", "Psychological"],
+    type: "anime",
+    rating: 9.0,
+    hasAnime: true,
+    hasManga: true,
+    animeEpisodes: 24,
+    mangaChapters: 12,
+  },
+  {
+    id: 'anilist-101280',
+    anilistId: 101280,
+    title: "That Time I Got Reincarnated as a Slime",
+    originalTitle: "転生したらスライムだった件",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101280-5bW17aPqG9Nn.jpg",
+    genre: "Isekai",
+    genres: ["Isekai", "Fantasy", "Action"],
+    type: "anime",
+    rating: 8.1,
+    hasAnime: true,
+    hasManga: true,
+    animeEpisodes: 24,
+    mangaChapters: 120,
+  },
+  {
+    id: 'anilist-142838',
+    anilistId: 142838,
+    title: "Oshi no Ko",
+    originalTitle: "【推しの子】",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx142838-89ZJ0KqQkS00.jpg",
+    genre: "Drama",
+    genres: ["Drama", "Supernatural", "Slice of Life"],
+    type: "anime",
+    rating: 8.7,
+    hasAnime: true,
+    hasManga: true,
+    animeEpisodes: 11,
+    mangaChapters: 166,
+  },
+  {
+    id: 'anilist-105778',
+    anilistId: 105778,
+    title: "Solo Leveling",
+    originalTitle: "俺だけレベルアップな件",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx105778-T9E6uB3e7Qn3.jpg",
+    genre: "Action",
+    genres: ["Action", "Fantasy", "Adventure"],
+    type: "manga",
+    rating: 8.6,
+    hasAnime: true,
+    hasManga: true,
+    animeEpisodes: 12,
+    mangaChapters: 200,
+  },
+  {
+    id: 'anilist-30002',
+    anilistId: 30002,
+    title: "Berserk",
+    originalTitle: "ベルセルク",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30002-7Sc26rm2658W.jpg",
+    genre: "Action",
+    genres: ["Action", "Fantasy", "Horror"],
+    type: "manga",
+    rating: 9.3,
+    hasAnime: true,
+    hasManga: true,
+    animeEpisodes: 25,
+    mangaChapters: 376,
+  },
+];
+
 // ── Fetch full set of 50 cards ─────────────────────────────────────────────────
 async function fetchFullSet(genre: string, seed: string): Promise<DiscoveryItem[]> {
   const seenIds = new Set<string>();
@@ -287,6 +530,7 @@ async function fetchFullSet(genre: string, seed: string): Promise<DiscoveryItem[
 
   for (let p = 0; p < types.length && all.length < TOTAL_CARDS_TARGET; p++) {
     try {
+      if (p > 0) await new Promise((r) => setTimeout(r, 120));
       const batch = await fetchAniListBatch(genre, p + 1, types[p]);
       for (const item of batch) {
         if (seenIds.has(item.id)) continue;
@@ -299,29 +543,47 @@ async function fetchFullSet(genre: string, seed: string): Promise<DiscoveryItem[
     } catch (_) {}
   }
 
-  // Fallback resilience: If genre query returned 0 or < 5 cards, populate with general popular items
-  if (all.length < 5) {
-    try {
-      const fallbackAnime = await fetchAniListBatch('Semua', 1, 'ANIME');
-      const fallbackManga = await fetchAniListBatch('Semua', 1, 'MANGA');
-      for (const item of [...fallbackAnime, ...fallbackManga]) {
-        if (seenIds.has(item.id)) continue;
-        if (seenImages.has(item.posterUrl)) continue;
-        seenIds.add(item.id);
-        seenImages.add(item.posterUrl);
+  // FALLBACK GUARANTEE: If API returned fewer than TOTAL_CARDS_TARGET items (e.g. rate limit HTTP 429),
+  // pull items from STATIC_FALLBACK_POOL so the marquee NEVER displays 0 cards!
+  if (all.length < TOTAL_CARDS_TARGET) {
+    const matchingFallback = STATIC_FALLBACK_POOL.filter((item) => {
+      if (genre === 'Semua') return true;
+      const lower = genre.toLowerCase();
+      return (
+        item.genre.toLowerCase() === lower ||
+        item.genres.some((g) => g.toLowerCase() === lower)
+      );
+    });
 
-        if (genre !== 'Semua' && !item.genres.includes(genre)) {
-          item.genres = [genre, ...item.genres].slice(0, 3);
-          item.genre = genre;
-        }
+    const poolToUse = matchingFallback.length > 0 ? matchingFallback : STATIC_FALLBACK_POOL;
 
-        all.push(item);
-        if (all.length >= TOTAL_CARDS_TARGET) break;
+    for (const item of poolToUse) {
+      if (seenIds.has(item.id)) continue;
+      if (seenImages.has(item.posterUrl)) continue;
+      seenIds.add(item.id);
+      seenImages.add(item.posterUrl);
+
+      const clone = { ...item };
+      if (genre !== 'Semua' && !clone.genres.some((g) => g.toLowerCase() === genre.toLowerCase())) {
+        clone.genres = [genre, ...clone.genres].slice(0, 3);
+        clone.genre = genre;
       }
-    } catch (_) {}
+      all.push(clone);
+      if (all.length >= TOTAL_CARDS_TARGET) break;
+    }
   }
 
-  return seededShuffle(all, `${seed}_${genre}`).slice(0, TOTAL_CARDS_TARGET);
+  // Duplication guarantee to ensure marquee loop always has 50 items
+  let finalSet = [...all];
+  while (finalSet.length > 0 && finalSet.length < TOTAL_CARDS_TARGET) {
+    const clones = finalSet.map((item, idx) => ({
+      ...item,
+      id: `${item.id}-dup-${finalSet.length}-${idx}`,
+    }));
+    finalSet = [...finalSet, ...clones].slice(0, TOTAL_CARDS_TARGET);
+  }
+
+  return seededShuffle(finalSet, `${seed}_${genre}`).slice(0, TOTAL_CARDS_TARGET);
 }
 
 export const DiscoveryMarqueeBanner: React.FC<DiscoveryMarqueeBannerProps> = ({ onQuickAdd, existingTitles }) => {
