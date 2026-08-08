@@ -221,7 +221,7 @@ export const ChangelogNotification: React.FC = () => {
               <span>Pushed to GitHub <strong style={{ color: '#94a3b8' }}>main</strong></span>
             </div>
             <a
-              href="https://github.com"
+              href="https://github.com/AnataSim/wast"
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: '#38bdf8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '2px' }}
