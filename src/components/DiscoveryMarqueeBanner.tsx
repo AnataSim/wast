@@ -40,7 +40,7 @@ const TOTAL_CARDS_TARGET = 50;
 const LS_GENRE_KEY = 'wast_discovery_genre';
 const LS_SCROLL_KEY = 'wast_discovery_scroll';
 const LS_SEED_KEY = 'wast_discovery_seed_date';
-const LS_CARDS_KEY = 'wast_discovery_cards';
+const LS_CARDS_KEY = 'wast_discovery_cards_v2';
 
 function getTodaySeed(): string {
   return new Date().toISOString().slice(0, 10);
@@ -282,7 +282,7 @@ const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
     anilistId: 154587,
     title: "Frieren: Beyond Journey's End",
     originalTitle: "葬送のフリーレン",
-    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx154587-nGU9mZLDptxM.jpg",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx154587-qQTzQnEJJ3oB.jpg",
     genre: "Action",
     genres: ["Action", "Adventure", "Fantasy"],
     type: "anime",
@@ -297,7 +297,7 @@ const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
     anilistId: 101921,
     title: "Kaguya-sama: Love is War",
     originalTitle: "かぐや様は告らせたい～天才たちの恋愛頭脳戦～",
-    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101921-6g6nC1R0aV9m.jpg",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101921-ufrjLzhSz7L1.jpg",
     genre: "Romance",
     genres: ["Romance", "Comedy", "Slice of Life"],
     type: "anime",
@@ -312,7 +312,7 @@ const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
     anilistId: 113415,
     title: "Jujutsu Kaisen",
     originalTitle: "呪術廻戦",
-    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx113415-bbBWj4pGFseh.png",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx113415-LHBAeoZDIsnF.jpg",
     genre: "Action",
     genres: ["Action", "Fantasy", "Supernatural"],
     type: "anime",
@@ -327,7 +327,7 @@ const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
     anilistId: 127230,
     title: "Chainsaw Man",
     originalTitle: "チェンソーマン",
-    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx127230-010n0S2e0x4K.png",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx127230-DdP4vAdssLoz.png",
     genre: "Action",
     genres: ["Action", "Fantasy", "Supernatural"],
     type: "anime",
@@ -342,7 +342,7 @@ const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
     anilistId: 124080,
     title: "Horimiya",
     originalTitle: "ホリミヤ",
-    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx124080-b74B3a8L9S87.jpg",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx124080-3i22mRVPBS0T.jpg",
     genre: "Romance",
     genres: ["Romance", "Slice of Life", "Comedy"],
     type: "anime",
@@ -357,7 +357,7 @@ const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
     anilistId: 101922,
     title: "Demon Slayer: Kimetsu no Yaiba",
     originalTitle: "鬼滅の刃",
-    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101922-PEn1rB9R9C6z.jpg",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101922-WBsBl0ClmgYL.jpg",
     genre: "Action",
     genres: ["Action", "Fantasy", "Supernatural"],
     type: "anime",
@@ -372,7 +372,7 @@ const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
     anilistId: 140960,
     title: "Spy x Family",
     originalTitle: "SPY×FAMILY",
-    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx140960-vNL2fB856yD7.jpg",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx140960-Kb6R5nYQfjmP.jpg",
     genre: "Comedy",
     genres: ["Comedy", "Action", "Slice of Life"],
     type: "anime",
@@ -387,7 +387,7 @@ const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
     anilistId: 108465,
     title: "Mushoku Tensei: Jobless Reincarnation",
     originalTitle: "無職転生 ～異世界行ったら本気だす～",
-    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx108465-bErZqZ9k5z2d.jpg",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx108465-1ANspF1EWyFx.jpg",
     genre: "Isekai",
     genres: ["Isekai", "Fantasy", "Adventure"],
     type: "anime",
@@ -402,7 +402,7 @@ const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
     anilistId: 132405,
     title: "My Dress-Up Darling",
     originalTitle: "その着せ替え人形は恋をする",
-    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx132405-sP88uC25a2qA.jpg",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx132405-qP7FQYGmNI3d.jpg",
     genre: "Romance",
     genres: ["Romance", "Slice of Life", "Comedy"],
     type: "anime",
@@ -417,7 +417,7 @@ const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
     anilistId: 130003,
     title: "Bocchi the Rock!",
     originalTitle: "ぼっち・ざ・ろっく！",
-    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx130003-k2F7Jm5q1m8v.jpg",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx130003-HTDmeL4RGeJ4.png",
     genre: "Slice of Life",
     genres: ["Slice of Life", "Comedy", "Music"],
     type: "anime",
@@ -432,7 +432,7 @@ const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
     anilistId: 126791,
     title: "Cyberpunk: Edgerunners",
     originalTitle: "サイバーパンク エッジランナーズ",
-    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx126791-j5Yg22oG007P.png",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx126791-Rwhm1a5QFope.jpg",
     genre: "Sci-Fi",
     genres: ["Sci-Fi", "Action", "Drama"],
     type: "anime",
@@ -447,7 +447,7 @@ const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
     anilistId: 9253,
     title: "Steins;Gate",
     originalTitle: "シュタインズ・ゲート",
-    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx9253-1K076C55PZ5P.jpg",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx9253-tIUXF2gfU8Sg.jpg",
     genre: "Sci-Fi",
     genres: ["Sci-Fi", "Thriller", "Psychological"],
     type: "anime",
@@ -462,7 +462,7 @@ const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
     anilistId: 101280,
     title: "That Time I Got Reincarnated as a Slime",
     originalTitle: "転生したらスライムだった件",
-    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101280-5bW17aPqG9Nn.jpg",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101280-tDxCVJm714nt.jpg",
     genre: "Isekai",
     genres: ["Isekai", "Fantasy", "Action"],
     type: "anime",
@@ -477,7 +477,7 @@ const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
     anilistId: 142838,
     title: "Oshi no Ko",
     originalTitle: "【推しの子】",
-    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx142838-89ZJ0KqQkS00.jpg",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx142838-26JrqcFU1ljB.jpg",
     genre: "Drama",
     genres: ["Drama", "Supernatural", "Slice of Life"],
     type: "anime",
@@ -492,7 +492,7 @@ const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
     anilistId: 105778,
     title: "Solo Leveling",
     originalTitle: "俺だけレベルアップな件",
-    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx105778-T9E6uB3e7Qn3.jpg",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx105778-euxXZEIfDY2u.png",
     genre: "Action",
     genres: ["Action", "Fantasy", "Adventure"],
     type: "manga",
@@ -507,7 +507,7 @@ const STATIC_FALLBACK_POOL: DiscoveryItem[] = [
     anilistId: 30002,
     title: "Berserk",
     originalTitle: "ベルセルク",
-    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30002-7Sc26rm2658W.jpg",
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30002-Cul4OeN7bYtn.jpg",
     genre: "Action",
     genres: ["Action", "Fantasy", "Horror"],
     type: "manga",
@@ -892,7 +892,13 @@ export const DiscoveryMarqueeBanner: React.FC<DiscoveryMarqueeBannerProps> = ({ 
                       alt={item.title}
                       referrerPolicy="no-referrer"
                       loading="lazy"
-                      onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0'; }}
+                      onError={(e) => {
+                        const img = e.target as HTMLImageElement;
+                        if (!img.dataset.fallback) {
+                          img.dataset.fallback = 'true';
+                          img.src = 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&auto=format&fit=crop&q=80';
+                        }
+                      }}
                       style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'opacity 0.3s ease' }}
                     />
 
