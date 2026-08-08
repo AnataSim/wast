@@ -228,7 +228,7 @@ export const Header: React.FC<HeaderProps> = ({
           )}
 
           <button 
-            className="pill-btn active" 
+            className="pill-btn active header-add-title-btn" 
             onClick={onOpenAddModal} 
             style={{ 
               background: 'var(--accent-blue)', 

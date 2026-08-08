@@ -455,6 +455,10 @@ body {
     font-size: 0.78rem;
   }
 
+  .header-add-title-btn {
+    display: none !important;
+  }
+
   /* Main Layout Spacing */
   .main-container {
     padding: 0 10px 16px !important;

@@ -939,7 +939,10 @@ export const AppContent: React.FC = () => {
       )}
       <CursorTrail />
       <AnimatedBackground />
-      <ChangelogNotification />
+      <ChangelogNotification onOpenAddModal={() => {
+        setEditingItem(null);
+        setIsMediaModalOpen(true);
+      }} />
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Header
           filter={filter}

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Sparkles, GitCommit, CheckCircle2, ChevronUp, ChevronDown, X, ExternalLink } from 'lucide-react';
+import { Sparkles, GitCommit, CheckCircle2, ChevronUp, ChevronDown, X, ExternalLink, Plus } from 'lucide-react';
 
-export const ChangelogNotification: React.FC = () => {
+interface ChangelogNotificationProps {
+  onOpenAddModal?: () => void;
+}
+
+export const ChangelogNotification: React.FC<ChangelogNotificationProps> = ({ onOpenAddModal }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
-
-  if (isDismissed) return null;
 
   const commitTitle = "feat(marquee): smart anime & manga cross-detection, daily date seed 1-50, accurate chapter count & japanese title support";
   const commitHash = "c9a2e41";
@@ -48,16 +50,15 @@ export const ChangelogNotification: React.FC = () => {
     <div
       style={{
         position: 'fixed',
-        bottom: '24px',
-        right: '24px',
+        bottom: '20px',
+        right: '20px',
         zIndex: 9999,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-end',
+        gap: '10px',
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
       }}
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
     >
       {/* Expanded Popup Card */}
       {isOpen && (
@@ -232,27 +233,56 @@ export const ChangelogNotification: React.FC = () => {
         </div>
       )}
 
-      {/* Floating Trigger Button */}
-      <button
-        onClick={() => setIsOpen((prev) => !prev)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '8px 14px',
-          borderRadius: '30px',
-          background: isOpen
-            ? 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)'
-            : 'rgba(10, 15, 29, 0.9)',
-          backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(56, 189, 248, 0.4)',
-          color: '#ffffff',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.4), 0 0 15px rgba(56, 189, 248, 0.2)',
-          cursor: 'pointer',
-          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-          position: 'relative',
-        }}
-      >
+      {/* Floating Action Group Container */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+        {/* Floating Add Title Button (Top) */}
+        {onOpenAddModal && (
+          <button
+            onClick={() => onOpenAddModal()}
+            title="Tambah Anime atau Manga Baru"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '9px 16px',
+              borderRadius: '30px',
+              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+              color: '#ffffff',
+              fontWeight: 700,
+              fontSize: '0.8rem',
+              border: '1px solid rgba(147, 197, 253, 0.4)',
+              boxShadow: '0 8px 25px rgba(37, 99, 235, 0.45), 0 0 15px rgba(59, 130, 246, 0.3)',
+              cursor: 'pointer',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+          >
+            <Plus size={16} strokeWidth={2.5} />
+            <span>Tambah Judul</span>
+          </button>
+        )}
+
+        {/* Floating Trigger Button: Update Baru (Bottom) */}
+        {!isDismissed && (
+          <button
+            onClick={() => setIsOpen((prev) => !prev)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 14px',
+              borderRadius: '30px',
+              background: isOpen
+                ? 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)'
+                : 'rgba(10, 15, 29, 0.9)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(56, 189, 248, 0.4)',
+              color: '#ffffff',
+              boxShadow: '0 8px 25px rgba(0, 0, 0, 0.4), 0 0 15px rgba(56, 189, 248, 0.2)',
+              cursor: 'pointer',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              position: 'relative',
+            }}
+          >
         {/* Pulsing Alert Badge Dot */}
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div
@@ -282,6 +312,8 @@ export const ChangelogNotification: React.FC = () => {
 
         {isOpen ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
       </button>
+      )}
+      </div>
 
       <style>{`
         @keyframes ping {
