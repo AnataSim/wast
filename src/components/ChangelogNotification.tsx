@@ -8,10 +8,15 @@ interface ChangelogNotificationProps {
 export const ChangelogNotification: React.FC<ChangelogNotificationProps> = ({ onOpenAddModal }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const commitTitle = "feat(release): auto-enter splash W-002, dynamic 1.8s->0.7s orbit ring, delete link fix & rules update";
+  const commitTitle = "fix(marquee): resolve 0 recommendations issue on genre filter & account switch, add fallback resilience";
   const releaseDate = "8 Agustus 2026";
 
   const changelogItems = [
+    {
+      title: "Fix 0 Rekomendasi Akun / Genre",
+      description: "Memperbaiki isu 0 rekomendasi saat berganti akun atau filter genre dengan integrasi tag Isekai AniList & sistem fallback otomatis.",
+      category: "Fix",
+    },
     {
       title: "Hapus Link Nonton & Baca",
       description: "Menghapus URL link pada form edit kini menghapus secara permanen dari Firestore database & tampilan kartu.",
@@ -36,16 +41,6 @@ export const ChangelogNotification: React.FC<ChangelogNotificationProps> = ({ on
       title: "Deteksi Otomatis Anime & Manga",
       description: "Tombol `+ Anime` & `+ Manga` di kartu rekomendasi otomatis menyesuaikan berdasarkan ketersediaan versi media di AniList.",
       category: "New",
-    },
-    {
-      title: "Judul Bahasa Jepang & Total Chapter",
-      description: "Menyimpan & menampilkan judul asli Jepang serta total episode/chapter asli dari API AniList.",
-      category: "New",
-    },
-    {
-      title: "Genre Badge Vertikal & Rekomendasi Harian",
-      description: "Hingga 3 genre tampil bertumpuk vertikal dengan genre terpilih di paling atas. Rekomendasi stabil 1-50 tiap hari.",
-      category: "Algorithm",
     },
   ];
 

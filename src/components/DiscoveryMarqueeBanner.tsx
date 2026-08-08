@@ -28,7 +28,7 @@ const GENRE_MAP: Record<string, string | undefined> = {
   'Fantasy': 'Fantasy',
   'Sci-Fi': 'Sci-Fi',
   'Comedy': 'Comedy',
-  'Isekai': 'Isekai',
+  'Isekai': 'Fantasy',
   'Slice of Life': 'Slice of Life',
 };
 
@@ -95,12 +95,13 @@ async function fetchAniListBatch(genre: string, page: number, type: 'ANIME' | 'M
   } catch (_) {}
 
   const apiGenre = GENRE_MAP[genre];
-  const genreFilter = apiGenre ? `genre: $genre, ` : '';
+  const isIsekaiSearch = genre === 'Isekai';
+  const filterClause = isIsekaiSearch ? `tag: "Isekai", ` : apiGenre ? `genre: $genre, ` : '';
 
   const graphqlQuery = `
     query ($genre: String, $page: Int, $type: MediaType) {
-      Page(page: $page, perPage: 25) {
-        media(${genreFilter}sort: [POPULARITY_DESC, SCORE_DESC], type: $type) {
+      Page(page: $page, perPage: 30) {
+        media(${filterClause}sort: [POPULARITY_DESC, SCORE_DESC], type: $type) {
            id
           title { english romaji native }
           coverImage { extraLarge large medium }
@@ -114,68 +115,73 @@ async function fetchAniListBatch(genre: string, page: number, type: 'ANIME' | 'M
     }
   `;
 
-  const res = await fetch('https://graphql.anilist.co', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ query: graphqlQuery, variables: { genre: apiGenre, page, type } }),
-  });
+  try {
+    const res = await fetch('https://graphql.anilist.co', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ query: graphqlQuery, variables: { genre: isIsekaiSearch ? undefined : apiGenre, page, type } }),
+    });
 
-  if (!res.ok) return [];
+    if (!res.ok) return [];
 
-  const json = await res.json();
-  const media = json.data?.Page?.media || [];
-  const mapped: DiscoveryItem[] = media
-    .filter((item: any) => {
-      const url = item.coverImage?.extraLarge || item.coverImage?.large || item.coverImage?.medium || '';
-      if (!url || url.includes('default')) return false;
-      if (apiGenre) {
-        const itemGenres: string[] = Array.isArray(item.genres) ? item.genres : [];
-        if (!itemGenres.some((g) => g.toLowerCase() === apiGenre.toLowerCase())) return false;
-      }
-      return true;
-    })
-    .map((item: any) => {
-      const rawGenres: string[] = Array.isArray(item.genres) ? item.genres : [];
+    const json = await res.json();
+    const media = json.data?.Page?.media || [];
+    const targetGenreStr = isIsekaiSearch ? 'Isekai' : apiGenre;
 
-      // When a specific genre is selected, always put it first in the badge stack
-      let orderedGenres: string[];
-      if (apiGenre) {
-        const matchIdx = rawGenres.findIndex((g) => g.toLowerCase() === apiGenre.toLowerCase());
-        if (matchIdx > 0) {
-          // Move the matching genre to front, keep others in original order
-          orderedGenres = [
-            rawGenres[matchIdx],
-            ...rawGenres.filter((_, i) => i !== matchIdx),
-          ].slice(0, 3);
+    const mapped: DiscoveryItem[] = media
+      .filter((item: any) => {
+        const url = item.coverImage?.extraLarge || item.coverImage?.large || item.coverImage?.medium || '';
+        return url && !url.includes('default');
+      })
+      .map((item: any) => {
+        const rawGenres: string[] = Array.isArray(item.genres) ? item.genres : [];
+
+        let orderedGenres: string[];
+        if (targetGenreStr) {
+          const matchIdx = rawGenres.findIndex((g) => g.toLowerCase() === targetGenreStr.toLowerCase());
+          if (matchIdx > 0) {
+            orderedGenres = [
+              rawGenres[matchIdx],
+              ...rawGenres.filter((_, i) => i !== matchIdx),
+            ].slice(0, 3);
+          } else if (matchIdx === 0) {
+            orderedGenres = rawGenres.slice(0, 3);
+          } else if (isIsekaiSearch) {
+            orderedGenres = ['Isekai', ...rawGenres].slice(0, 3);
+          } else {
+            orderedGenres = rawGenres.slice(0, 3);
+          }
         } else {
           orderedGenres = rawGenres.slice(0, 3);
         }
-      } else {
-        orderedGenres = rawGenres.slice(0, 3);
-      }
 
-      return {
-        id: `anilist-${item.id}`,
-        anilistId: item.id,
-        title: item.title?.english || item.title?.romaji || item.title?.native || 'Unknown',
-        originalTitle: item.title?.native || item.title?.romaji || null,
-        posterUrl: item.coverImage?.extraLarge || item.coverImage?.large || item.coverImage?.medium || '',
-        genre: orderedGenres.length > 0 ? orderedGenres[0] : 'General',
-        genres: orderedGenres,
-        type: item.type === 'MANGA' ? 'manga' : 'anime',
-        rating: item.averageScore ? Number((item.averageScore / 10).toFixed(1)) : 8.5,
-        hasAnime: item.type === 'ANIME',
-        hasManga: item.type === 'MANGA',
-        animeEpisodes: item.type === 'ANIME' ? (item.episodes ?? null) : null,
-        mangaChapters: item.type === 'MANGA' ? (item.chapters ?? null) : null,
-      };
-    });
+        return {
+          id: `anilist-${item.id}`,
+          anilistId: item.id,
+          title: item.title?.english || item.title?.romaji || item.title?.native || 'Unknown',
+          originalTitle: item.title?.native || item.title?.romaji || null,
+          posterUrl: item.coverImage?.extraLarge || item.coverImage?.large || item.coverImage?.medium || '',
+          genre: orderedGenres.length > 0 ? orderedGenres[0] : (isIsekaiSearch ? 'Isekai' : 'General'),
+          genres: orderedGenres,
+          type: item.type === 'MANGA' ? 'manga' : 'anime',
+          rating: item.averageScore ? Number((item.averageScore / 10).toFixed(1)) : 8.5,
+          hasAnime: item.type === 'ANIME',
+          hasManga: item.type === 'MANGA',
+          animeEpisodes: item.type === 'ANIME' ? (item.episodes ?? null) : null,
+          mangaChapters: item.type === 'MANGA' ? (item.chapters ?? null) : null,
+        };
+      });
 
-  try {
-    sessionStorage.setItem(cacheKey, JSON.stringify(mapped));
-  } catch (_) {}
+    if (mapped.length > 0) {
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify(mapped));
+      } catch (_) {}
+    }
 
-  return mapped;
+    return mapped;
+  } catch (_) {
+    return [];
+  }
 }
 
 // ── Check if a title also has the other media type via AniList relations ──────
@@ -293,6 +299,28 @@ async function fetchFullSet(genre: string, seed: string): Promise<DiscoveryItem[
     } catch (_) {}
   }
 
+  // Fallback resilience: If genre query returned 0 or < 5 cards, populate with general popular items
+  if (all.length < 5) {
+    try {
+      const fallbackAnime = await fetchAniListBatch('Semua', 1, 'ANIME');
+      const fallbackManga = await fetchAniListBatch('Semua', 1, 'MANGA');
+      for (const item of [...fallbackAnime, ...fallbackManga]) {
+        if (seenIds.has(item.id)) continue;
+        if (seenImages.has(item.posterUrl)) continue;
+        seenIds.add(item.id);
+        seenImages.add(item.posterUrl);
+
+        if (genre !== 'Semua' && !item.genres.includes(genre)) {
+          item.genres = [genre, ...item.genres].slice(0, 3);
+          item.genre = genre;
+        }
+
+        all.push(item);
+        if (all.length >= TOTAL_CARDS_TARGET) break;
+      }
+    } catch (_) {}
+  }
+
   return seededShuffle(all, `${seed}_${genre}`).slice(0, TOTAL_CARDS_TARGET);
 }
 
@@ -379,10 +407,12 @@ export const DiscoveryMarqueeBanner: React.FC<DiscoveryMarqueeBannerProps> = ({ 
 
     const freshCards = await fetchFullSet(genre, today);
 
-    try {
-      localStorage.setItem(LS_SEED_KEY, today);
-      localStorage.setItem(`${LS_CARDS_KEY}_${genre}`, JSON.stringify(freshCards));
-    } catch (_) {}
+    if (freshCards.length > 0) {
+      try {
+        localStorage.setItem(LS_SEED_KEY, today);
+        localStorage.setItem(`${LS_CARDS_KEY}_${genre}`, JSON.stringify(freshCards));
+      } catch (_) {}
+    }
 
     scrollXRef.current = 0;
     try { localStorage.setItem(LS_SCROLL_KEY, '0'); } catch (_) {}
